@@ -1,8 +1,8 @@
 package frc.robot.subsystems;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Volts;
+//import static edu.wpi.first.units.Units.Meters;
+//import static edu.wpi.first.units.Units.MetersPerSecond;
+//import static edu.wpi.first.units.Units.Radians;
+//import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -83,29 +83,13 @@ public class Chassis extends SubsystemBase {
       double velocity = dx/dt;
       double distance = dx;
     
-      //l_encoder.setDistancePerPulse(encoder_dpp);
-      //r_encoder.setDistancePerPulse(encoder_dpp);
-      //l_encoder.setReverseDirection(false); 
-      //r_encoder.setReverseDirection(true);
-
-      //m_odometry = new DifferentialDriveOdometry(
-      //  gyro.getRotation2d(), 
-      //  l_encoder.getDistance(), 
-      //  r_encoder.getDistance()
-      //);
-      
-     // m_odometry.resetPosition(
-     //   gyro.getRotation2d(), 
-     //   l_encoder.getDistance(), 
-     //   r_encoder.getDistance(), 
-     //   new Pose2d()
-     // );
+    
 
       odometry_engaged = true;
     } catch(Exception e){
       odometry_engaged=false;
     }finally{
-      SmartDashboard.putBoolean("Encoder Status", odometry_engaged);
+      SmartDashboard.putBoolean("Encoder Stat", odometry_engaged);
     }
 }
 public double rot_monitor;
@@ -131,5 +115,41 @@ public void arcadeDrive(double speed, double rot){
         rotationSpeed
         );
         drive(chassisSpeeds);
+
+        
     }
+    
+
+  public Command driveCommand(XboxController controller){ 
+        // SmartDashboard.putNumber("brake troubleshooting", playstationBrake);
+    
+    return Commands.run(
+      () -> 
+        this.arcadeDrive(
+        (controller.getRawAxis(Constants.ID_JOYSTICK_SPEED)- controller.getRawAxis(Constants.ID_JOYSTICK_BRAKE)),
+        (Math.abs(controller.getRawAxis(Constants.ID_JOYSTICK_ROT)) > Constants.kDeadBandRot ? controller.getRawAxis(Constants.ID_JOYSTICK_ROT) : 0)), 
+      this);
+  }
+
+  public boolean StopChassis(){
+    left1.stopMotor();
+    right1.stopMotor();
+    // Followers stop automatically
+    return true;
+  }
+  
+  public Command stopCommand(){
+    return this.runOnce(() -> this.StopChassis());
+  }
+
+  public void clearFaults(){
+    left1.clearStickyFaults();
+    left2.clearStickyFaults();
+    right1.clearStickyFaults();
+    right2.clearStickyFaults();
+    System.out.println("Successfully Cleared Drivetrain controllers Sticky Faults");
+  }
+  public Command clearFaultsCommand(){
+    return this.runOnce(() -> this.clearFaults());
+  }
 }
