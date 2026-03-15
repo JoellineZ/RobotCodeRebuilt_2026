@@ -25,9 +25,25 @@ public class Constants {
     public static final int ID_EXTD_NEO = 5;
     public static final double LIMIT_BWD = 0;
     public static final double LIMIT_FWD = 20;
+    public static final double INTAKE_WHEEL_SPEED = 0;
+    public static final int ID_INTAKE_ARM = 0;
+    public static final int ID_INTAKE_WHEEL = 0;
+    public static final double MAX_ARM_SPEED_PERCENT = 0;
+  }
+
+  public class Shooter{
+    public static final int ID_SHOOTER_BACK = 6;
+    public static final int ID_SHOOTER_FRONT = 7;
+    public static final int ID_SHOOTER_LINE = 8;
+    public static final double SHOOTER_LINEFUEL_SPEED = 0.5;
   }
 
   public class IO{
     public static final int ID_CONTROLLER = 0;
+    public static final int ID_DRIVER_CHASSIS = 0;
+    public static final int ID_DRIVER_MECH = 0;    
+    public static final int ID_JOYSTICK_SPEED = 0;
+    public static final int ID_JOYSTICK_ROT = 0;
+    public static final int ID_JOYSTICK_BRAKE = 0;
   }
 }

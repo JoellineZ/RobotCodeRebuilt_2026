@@ -8,23 +8,17 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
-// import edu.wpi.first.units.measure.MutVoltage;
-//import edu.wpi.first.wpilibj.XboxController;
-//import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-// import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase {
     
-  private final SparkMax m_back = new SparkMax(Constants.ID_SHOOTER_BACK, MotorType.kBrushless);
-  private final SparkMax m_front = new SparkMax(Constants.ID_SHOOTER_FRONT, MotorType.kBrushless);
-  private final SparkMax m_lineFuel = new SparkMax(Constants.ID_SHOOTER_LINE, MotorType.kBrushless);
+  private final SparkMax m_back = new SparkMax(Constants.Shooter.ID_SHOOTER_BACK, MotorType.kBrushless);
+  private final SparkMax m_front = new SparkMax(Constants.Shooter.ID_SHOOTER_FRONT, MotorType.kBrushless);
+  private final SparkMax m_lineFuel = new SparkMax(Constants.Shooter.ID_SHOOTER_LINE, MotorType.kBrushless);
   private SparkMaxConfig backConfig = new SparkMaxConfig();
   private SparkMaxConfig frontConfig = new SparkMaxConfig();
   private SparkMaxConfig lineFuelConfig = new SparkMaxConfig();
@@ -45,7 +39,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void rollLineFuel() {
-    m_lineFuel.set(Constants.SHOOTER_LINEFUEL_SPEED);
+    m_lineFuel.set(Constants.Shooter.SHOOTER_LINEFUEL_SPEED);
   }
   public void stopMotors(){
     m_back.stopMotor();
