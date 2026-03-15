@@ -25,7 +25,7 @@ public class Chassis extends SubsystemBase {
     private Encoder r_encoder;
     private AHRS gyro = new AHRS(NavXComType.kMXP_SPI);
     private boolean odometry_engaged;
-    private static final double encoder_dpp = (Math.PI * Units.inchesToMeters(6))/128;
+    private static final double encoder_dpp = (Math.PI * Units.inchesToMeters(Constants.Chassis.WHEEL_DIAMETER_INCHES))/128;
 
     // Pathplanner
     private DifferentialDriveOdometry m_odometry;
@@ -106,6 +106,13 @@ public class Chassis extends SubsystemBase {
     right1.stopMotor();
     // Followers stop automatically
     return true;
+  }
+  private void SmartDashboard(){
+    SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
+    SmartDashboard.putNumber("Gyro Pitch", gyro.getPitch());
+    SmartDashboard.putNumber("Gyro Roll", gyro.getRoll());
+    SmartDashboard.putNumber("Left Encoder Ticks", l_encoder.get());
+    SmartDashboard.putNumber("Right Encoder Ticks", r_encoder.get());
   }
 
   public void clearFaults(){

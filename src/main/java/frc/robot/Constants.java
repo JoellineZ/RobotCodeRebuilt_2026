@@ -18,7 +18,8 @@ public class Constants {
     public static final double MAX_SPEED_ms2 = 3.0;
     public static final double MAX_ROTATION_SPEED_RAD_S = 1.0;
     public static final double Diameter = 12;
-    public static final double kTrackWitdth = 0.6; //meters} 
+    public static final double kTrackWitdth = 0.6; //meters
+    public static final double WHEEL_DIAMETER_INCHES = 6.0;
   }
 
   public class Intake{
@@ -29,6 +30,7 @@ public class Constants {
     public static final int ID_INTAKE_ARM = 0;
     public static final int ID_INTAKE_WHEEL = 0;
     public static final double MAX_ARM_SPEED_PERCENT = 0;
+    public static final double INTAKE_ROLL_SPEED = 0;
   }
 
   public class Shooter{
@@ -36,6 +38,10 @@ public class Constants {
     public static final int ID_SHOOTER_FRONT = 7;
     public static final int ID_SHOOTER_LINE = 8;
     public static final double SHOOTER_LINEFUEL_SPEED = 0.5;
+    public static final double OVERHEAT_TEMP = 60.0;
+    public static final double K_BACKSPIN = 0.3;
+    public static final double NEO_SAFE_RPM = 5400;
+    public static final double MAX_RPM = NEO_SAFE_RPM / (2-K_BACKSPIN);
   }
 
   public class IO{

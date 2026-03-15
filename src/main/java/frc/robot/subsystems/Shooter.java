@@ -8,6 +8,8 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -22,10 +24,14 @@ public class Shooter extends SubsystemBase {
   private SparkMaxConfig backConfig = new SparkMaxConfig();
   private SparkMaxConfig frontConfig = new SparkMaxConfig();
   private SparkMaxConfig lineFuelConfig = new SparkMaxConfig();
+  public double frontTemp;
+  public double backTemp;
 
   public Shooter() {
-    backConfig.idleMode(IdleMode.kCoast);
-    frontConfig.idleMode(IdleMode.kCoast);
+    backConfig.idleMode(IdleMode.kBrake);
+    frontConfig.idleMode(IdleMode.kBrake);
+    backConfig.smartCurrentLimit(35, 40);
+    frontConfig.smartCurrentLimit(35, 40);
     lineFuelConfig.idleMode(IdleMode.kBrake);
     frontConfig.inverted(true);
 
@@ -36,6 +42,8 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
+    frontTemp = m_front.getMotorTemperature();
+    backTemp = m_back.getMotorTemperature();
   }
 
   public void rollLineFuel() {
@@ -46,23 +54,29 @@ public class Shooter extends SubsystemBase {
     m_front.stopMotor();
     m_lineFuel.stopMotor();
   }
-    public void out(){
-    m_back.set(0.5);
-    m_front.set(0.5);
+  public void driveShooter(double speed){
+    speed = Math.max(-Constants.Shooter.MAX_RPM, Math.min(speed, Constants.Shooter.MAX_RPM)); // Clamp speed between 0 and 1
+    m_back.set(speed*(2.0-Constants.Shooter.K_BACKSPIN));
+    m_front.set(speed);
+  }
+  public void updateSmartDashboard(){
+    SmartDashboard.putNumber("Shooter Front Temp", frontTemp);
+    SmartDashboard.putNumber("Shooter Back Temp", backTemp);
+    SmartDashboard.putBoolean("Shooter Overheating", frontTemp > Constants.Shooter.OVERHEAT_TEMP || backTemp > Constants.Shooter.OVERHEAT_TEMP);
   }
   
+  // ====================COMMANDS====================
   public Command stopShooterCommand(){
     return Commands.runOnce(this::stopMotors);
   }
   public Command lineFuelCommand(){
     return Commands.run(this::rollLineFuel);
   }
-  public SequentialCommandGroup MainshooterCommand(){
+  public SequentialCommandGroup MainshooterCommand(double speed){
     return new SequentialCommandGroup(
-      Commands.runOnce(this::out),
+      Commands.runOnce(() -> this.driveShooter(speed)),
       new WaitCommand(0.2),
       Commands.runOnce(this::lineFuelCommand)
     );
   }
-
 }

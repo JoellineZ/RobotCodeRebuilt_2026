@@ -39,8 +39,7 @@ public RobotContainer() {
       m_chassis.clearFaultsCommand()
     ));
     lineFuelTrigger.onTrue(m_shooter.lineFuelCommand());
-    shootTrigger.onTrue(m_shooter.MainshooterCommand());
-    //shooterStopTrigger.onTrue(m_shooter.stopShooterCommand());
+    shootTrigger.whileTrue(m_shooter.MainshooterCommand(Constants.Shooter.MAX_RPM));
   }
   
   private void defaultCommands() {
