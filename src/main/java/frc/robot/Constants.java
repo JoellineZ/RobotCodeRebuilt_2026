@@ -23,7 +23,6 @@ public class Constants {
   }
 
   public class Intake{
-    public static final int ID_EXTD_NEO = 5;
     public static final double LIMIT_BWD = 1;
     public static final double LIMIT_FWD = 20;
     public static final double INTAKE_WHEEL_SPEED = 0;
