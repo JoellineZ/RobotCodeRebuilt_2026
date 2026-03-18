@@ -15,6 +15,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -77,7 +79,7 @@ public class Shooter extends SubsystemBase {
     m_conveyor.stopMotor();
   }
   public void setShooter(double speed){
-    speed = Math.max(0, Math.min(speed, Constants.Shooter.MAX_RPM_FRONT)); // Speed Limit
+    speed = MathUtil.clamp(speed, 0, Constants.Shooter.MAX_RPM_FRONT);
     double frontSpeed = speed;
     double backSpeed = speed*(2.0-Constants.Shooter.K_BACKSPIN);
 

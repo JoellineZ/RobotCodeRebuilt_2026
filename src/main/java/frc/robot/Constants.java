@@ -34,6 +34,11 @@ public class Constants {
     public static final int ID_INTAKE_WHEEL = 9;
     public static final double MAX_ARM_SPEED_PERCENT = 0.3;
     public static final double INTAKE_ROLL_SPEED = 0.45;
+    public static final double kP = 0; // 
+    public static final double kI = 0;
+    public static final double kD = 0;
+    public static final double MIN_ARM_POSITION = 0;
+    public static final double MAX_ARM_POSITION = 0;
   }
 
   public class Shooter{        
