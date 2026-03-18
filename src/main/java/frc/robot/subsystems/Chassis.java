@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -20,16 +20,16 @@ public class Chassis extends SubsystemBase {
   private final WPI_TalonSRX left2 = new WPI_TalonSRX(Constants.Chassis.ID_CH_LF2);
   private final WPI_TalonSRX right1 = new WPI_TalonSRX(Constants.Chassis.ID_CH_RG1);
   private final WPI_TalonSRX right2 = new WPI_TalonSRX(Constants.Chassis.ID_CH_RG2);
+  private final DifferentialDriveKinematics m_kinematics = new DifferentialDriveKinematics(Constants.Chassis.kTrackWidth);
   // private final DifferentialDrive m_drive = new DifferentialDrive(left1::set, right1::set);
-    private Encoder l_encoder;
-    private Encoder r_encoder;
-    private AHRS gyro = new AHRS(NavXComType.kMXP_SPI);
-    private boolean odometry_engaged;
-    private static final double encoder_dpp = (Math.PI * Units.inchesToMeters(Constants.Chassis.WHEEL_DIAMETER_INCHES))/128;
+  private Encoder l_encoder;
+  private Encoder r_encoder;
+  private AHRS gyro = new AHRS(NavXComType.kMXP_SPI);
+  private boolean odometry_engaged;
 
-    // Pathplanner
-    private DifferentialDriveOdometry m_odometry;
-    public double rot_monitor;
+  // Pathplanner
+  private DifferentialDriveOdometry m_odometry;
+  public double rot_monitor;
 
   public Chassis() {
     left2.follow(left1);
@@ -39,35 +39,43 @@ public class Chassis extends SubsystemBase {
     left2.setNeutralMode(NeutralMode.Brake);
     right2.setNeutralMode(NeutralMode.Brake);
     right1.setInverted(true);
-    left1.configOpenloopRamp(Constants.Chassis.kLoopRamp);
-    right1.configOpenloopRamp(Constants.Chassis.kLoopRamp);
-
-    gyro.reset();
-    m_odometry = new DifferentialDriveOdometry(
-        gyro.getRotation2d(), 
-        l_encoder.getDistance(), 
-        r_encoder.getDistance()
-      );
+    right2.setInverted(true);
+    // left1.configOpenloopRamp(Constants.Chassis.kLoopRamp);
+    // right1.configOpenloopRamp(Constants.Chassis.kLoopRamp);
+    
+    try{
+      l_encoder = new Encoder(Constants.Chassis.ID_ENCODER_LEFT1, Constants.Chassis.ID_ENCODER_LEFT2);
+      r_encoder = new Encoder(Constants.Chassis.ID_ENCODER_RIGHT1, Constants.Chassis.ID_ENCODER_RIGHT2);
+      l_encoder.setDistancePerPulse(Constants.Chassis.ENCODER_TICK_RATIO);
+      r_encoder.setDistancePerPulse(Constants.Chassis.ENCODER_TICK_RATIO);
+      r_encoder.setReverseDirection(true);
+      l_encoder.reset();
+      r_encoder.reset();
+      gyro.reset();
+    }catch(Exception e){
+      System.out.println("Gyro or Encoders not found, Odometry disabled");
+    }
+    initOdometry();
   }
 
   private void initOdometry(){
-    //FOR GPIO/DIO use try catch to avoid failure on robot Init
+    // FOR GPIO/DIO use try catch to avoid failure on robot Init
     try{ 
-      l_encoder = new Encoder(Constants.Chassis.ID_ENC_CL1, Constants.Chassis.ID_ENC_CL2);
-      r_encoder = new Encoder(Constants.Chassis.ID_ENC_CR1, Constants.Chassis.ID_ENC_CR2);
-      l_encoder.reset();
-      r_encoder.reset();
-      
+      m_odometry = new DifferentialDriveOdometry(
+          gyro.getRotation2d(), 
+          l_encoder.getDistance(), 
+          r_encoder.getDistance()
+        );
       double previusTime = Timer.getFPGATimestamp();
       double previusTicks = l_encoder.get();
       double realTime = Timer.getFPGATimestamp();
       double realTicks = l_encoder.get();
-      double dx = (realTicks - previusTicks) * Math.PI*Constants.Chassis.Diameter;
+      double dx = (realTicks - previusTicks) * Math.PI*Constants.Chassis.WHEEL_DIAMETER_INCHES;
       double dt = realTime - previusTime;
       
       // =========WPI==========
-      double velocity = dx/dt;
-      double distance = dx;
+      // double velocity = dx/dt;
+      // double distance = dx;
       odometry_engaged = true;
     } catch(Exception e){
       odometry_engaged=false;
@@ -77,25 +85,23 @@ public class Chassis extends SubsystemBase {
   }
 
   public void drive(ChassisSpeeds chassisSpeeds){
-    double forwardXSpeed = chassisSpeeds.vxMetersPerSecond;
-    if(Math.abs(forwardXSpeed)>Constants.Chassis.MAX_SPEED_ms2){
-        forwardXSpeed = forwardXSpeed > 0 ? Constants.Chassis.MAX_SPEED_ms2 : -Constants.Chassis.MAX_SPEED_ms2;
-    }
-      double angularVelocity = chassisSpeeds.omegaRadiansPerSecond;
-      rot_monitor = angularVelocity;
-      double leftVelocity = forwardXSpeed + (angularVelocity * Constants.Chassis.kTrackWitdth / 2);
-      double rightVelocity = forwardXSpeed - (angularVelocity * Constants.Chassis.kTrackWitdth / 2);
-    }
+    var wheelSpeeds = m_kinematics.toWheelSpeeds(chassisSpeeds);
+    wheelSpeeds.desaturate(Constants.Chassis.MAX_SPEED_ms);
+    double leftPercent = wheelSpeeds.leftMetersPerSecond/Constants.Chassis.MAX_SPEED_ms;
+    double rightPercent = wheelSpeeds.rightMetersPerSecond/Constants.Chassis.MAX_SPEED_ms;
+    left1.set(leftPercent);
+    right1.set(rightPercent);
+  }
 
   public void arcadeDrive(double speed, double rot){
         // deadbands
-        rot = Math.abs(rot)>=0.001 ? rot : 0;
-        speed = Math.abs(speed) >=0.001 ? speed :0;
-        double forwardSpeed = speed*Constants.Chassis.MAX_SPEED_ms2;
+        rot = Math.abs(rot)>=Constants.Chassis.kDeadBandRot ? rot : 0;
+        speed = Math.abs(speed) >=Constants.Chassis.kDeadBandSpeed ? speed :0;
+        double forwardSpeed = speed*Constants.Chassis.MAX_SPEED_ms;
         double rotationSpeed = rot*Constants.Chassis.MAX_ROTATION_SPEED_RAD_S;
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
         forwardSpeed, 
-        0, 
+        0, // No lateral movement in Tank Chassis
         rotationSpeed
         );
         drive(chassisSpeeds);    
@@ -107,12 +113,16 @@ public class Chassis extends SubsystemBase {
     // Followers stop automatically
     return true;
   }
+
   private void SmartDashboard(){
-    SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
-    SmartDashboard.putNumber("Gyro Pitch", gyro.getPitch());
-    SmartDashboard.putNumber("Gyro Roll", gyro.getRoll());
-    SmartDashboard.putNumber("Left Encoder Ticks", l_encoder.get());
-    SmartDashboard.putNumber("Right Encoder Ticks", r_encoder.get());
+    SmartDashboard.putBoolean("Odometry Engaged", odometry_engaged);
+    if (odometry_engaged){
+      SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
+      SmartDashboard.putNumber("Gyro Pitch", gyro.getPitch());
+      SmartDashboard.putNumber("Gyro Roll", gyro.getRoll());
+      SmartDashboard.putNumber("Left Encoder Ticks", l_encoder.get());
+      SmartDashboard.putNumber("Right Encoder Ticks", r_encoder.get());
+    }
   }
 
   public void clearFaults(){
@@ -123,6 +133,11 @@ public class Chassis extends SubsystemBase {
     System.out.println("Successfully Cleared Drivetrain controllers Sticky Faults");
   }
 
+  @Override
+  public void periodic() {
+    SmartDashboard();
+  }
+
   // ============================COMMANDS============================
   public Command clearFaultsCommand(){
     return this.runOnce(() -> this.clearFaults());
@@ -130,12 +145,12 @@ public class Chassis extends SubsystemBase {
   public Command stopCommand(){
     return this.runOnce(() -> this.StopChassis());
   }
-  public Command driveCommand(XboxController controller){ 
+  public Command driveCommand(XboxController controller, Chassis chassis){ 
     return Commands.run(
       () -> 
         this.arcadeDrive(
-        (controller.getRawAxis(Constants.IO.ID_JOYSTICK_SPEED)- controller.getRawAxis(Constants.IO.ID_JOYSTICK_BRAKE)),
-        (Math.abs(controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT)) > Constants.Chassis.kDeadBandRot ? controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT) : 0)), 
-      this);
+          (controller.getRawAxis(Constants.IO.ID_JOYSTICK_SPEED)- controller.getRawAxis(Constants.IO.ID_JOYSTICK_BRAKE)),
+        (Math.abs(controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT)) > Constants.Chassis.kDeadBandRot ? controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT) : 0))
+        ,this);
   }
 }

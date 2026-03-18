@@ -15,7 +15,7 @@ import com.revrobotics.PersistMode;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Commands;
 public class Intake extends SubsystemBase {
-  private final SparkMax m_arm = new SparkMax(Constants.Intake.ID_INTAKE_ARM, MotorType.kBrushless);
+  private final SparkMax m_arm = new SparkMax(Constants.Intake.ID_EXTDENDER, MotorType.kBrushless);
   private final SparkMax m_roller = new SparkMax(Constants.Intake.ID_INTAKE_WHEEL, MotorType.kBrushless);   
   private SparkMaxConfig armConfig = new SparkMaxConfig();
   private SparkMaxConfig wheelConfig = new SparkMaxConfig();
@@ -63,17 +63,17 @@ public class Intake extends SubsystemBase {
       ()->this.drive(
         controller.getRawAxis(XboxController.Axis.kRightTrigger.value)
         -controller.getRawAxis(XboxController.Axis.kLeftTrigger.value))
-        , this);
+        ,this);
   }
-   private double stopAtLimit(double input){
-      double output = input;
-      if (this.armEncoder.getPosition() <= 0 && input < 0){
-          output = 0; 
-      }
-      return output;
+  private double stopAtLimit(double input){
+    double output = input;
+    if (this.armEncoder.getPosition() <= 0 && input < 0){
+        output = 0; 
+    }
+    return output;
   }
 
   public Command stopRollersCommand(){
-      return Commands.runOnce(this::stopRoller);
+    return Commands.runOnce(this::stopRoller, this);
   }
 }

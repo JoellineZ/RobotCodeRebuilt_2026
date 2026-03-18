@@ -25,6 +25,7 @@ public class RobotContainer {
   public Trigger lineFuelTrigger = new JoystickButton(mech_controller, XboxController.Button.kA.value);
   //public Trigger shooterStopTrigger = new JoystickButton(mech_controller, XboxController.Button.kX.value);
   public Trigger shootTrigger = new JoystickButton(mech_controller, XboxController.Button.kY.value);
+  public Trigger sequenceTrigger = new JoystickButton(mech_controller, XboxController.Button.kX.value);
 
 public RobotContainer() {
   
@@ -39,14 +40,18 @@ public RobotContainer() {
       m_chassis.clearFaultsCommand()
     ));
     lineFuelTrigger.onTrue(m_shooter.lineFuelCommand());
-    shootTrigger.whileTrue(m_shooter.MainshooterCommand(Constants.Shooter.MAX_RPM));
+    // shootTrigger.onTrue(m_shooter.driveShooterCommand(750));
+    shootTrigger.onFalse(m_shooter.stopShooterCommand());
+    shootTrigger.onTrue(m_shooter.dumbTestCommand());
   }
   
   private void defaultCommands() {
     m_chassis.setDefaultCommand(
-        m_chassis.driveCommand(drive_controller)
+        m_chassis.driveCommand(drive_controller, m_chassis)
     );
-    m_shooter.setDefaultCommand(m_shooter.stopShooterCommand());
+    m_shooter.setDefaultCommand(
+      m_shooter.stopShooterCommand()
+    );
   }
 
   public Command getAutonomousCommand() {
