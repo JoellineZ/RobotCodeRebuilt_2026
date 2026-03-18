@@ -38,8 +38,8 @@ public class Chassis extends SubsystemBase {
     right1.setNeutralMode(NeutralMode.Brake);
     left2.setNeutralMode(NeutralMode.Brake);
     right2.setNeutralMode(NeutralMode.Brake);
-    right1.setInverted(true);
-    right2.setInverted(true);
+    left1.setInverted(true);
+    left2.setInverted(true);
     // left1.configOpenloopRamp(Constants.Chassis.kLoopRamp);
     // right1.configOpenloopRamp(Constants.Chassis.kLoopRamp);
     

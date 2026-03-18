@@ -26,7 +26,7 @@ public class Intake extends SubsystemBase {
     armConfig.idleMode(IdleMode.kBrake);
     wheelConfig.idleMode(IdleMode.kBrake);
     armConfig.inverted(false);
-    wheelConfig.inverted(true);
+    wheelConfig.inverted(false);
     m_arm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     m_roller.configure(wheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     //resetencoders()
@@ -58,7 +58,7 @@ public class Intake extends SubsystemBase {
   }
 
   // ====================COMMANDS====================
-  public Command driveCommand (XboxController controller){
+  public Command driveCommand (XboxController controller, Intake m_intake){
     return Commands.run(
       ()->this.drive(
         controller.getRawAxis(XboxController.Axis.kRightTrigger.value)
@@ -68,12 +68,14 @@ public class Intake extends SubsystemBase {
   private double stopAtLimit(double input){
     double output = input;
     if (this.armEncoder.getPosition() <= 0 && input < 0){
-        output = 0; 
+        output = 0;
     }
     return output;
   }
-
-  public Command stopRollersCommand(){
+  public Command rollWheelCommand(){
+    return Commands.runOnce(this::rollRoller, this);
+  }
+  public Command stopWheelCommand(){
     return Commands.runOnce(this::stopRoller, this);
   }
 }

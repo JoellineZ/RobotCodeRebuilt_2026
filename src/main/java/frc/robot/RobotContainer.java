@@ -22,12 +22,13 @@ public class RobotContainer {
   
   public Trigger stopChassisTrigger = new JoystickButton(drive_controller, XboxController.Button.kX.value);
 
-  public Trigger lineFuelTrigger = new JoystickButton(mech_controller, XboxController.Button.kA.value);
   //public Trigger shooterStopTrigger = new JoystickButton(mech_controller, XboxController.Button.kX.value);
   public Trigger shootTrigger = new JoystickButton(mech_controller, XboxController.Button.kY.value);
-  public Trigger sequenceTrigger = new JoystickButton(mech_controller, XboxController.Button.kX.value);
+  public Trigger shootBackTrigger = new JoystickButton(mech_controller, XboxController.Button.kB.value);
+  public Trigger wheelTrigger = new JoystickButton(mech_controller, XboxController.Button.kX.value); 
+  public Trigger conveyorTrigger = new JoystickButton(mech_controller, XboxController.Button.kA.value);
 
-public RobotContainer() {
+  public RobotContainer() {
   
     configureBindings();
     defaultCommands();
@@ -39,18 +40,32 @@ public RobotContainer() {
       m_chassis.stopCommand(), 
       m_chassis.clearFaultsCommand()
     ));
-    lineFuelTrigger.onTrue(m_shooter.lineFuelCommand());
+
+    conveyorTrigger.onTrue(m_shooter.conveyorCommand()); //!!
+    conveyorTrigger.onFalse(m_shooter.stopShooterCommand());
+
     // shootTrigger.onTrue(m_shooter.driveShooterCommand(750));
+    shootTrigger.onTrue(m_shooter.dumbTestFrontCommand());
     shootTrigger.onFalse(m_shooter.stopShooterCommand());
-    shootTrigger.onTrue(m_shooter.dumbTestCommand());
+    shootBackTrigger.onTrue(m_shooter.dumbTestBackCommand());
+    shootBackTrigger.onFalse(m_shooter.stopShooterCommand());
+
+    wheelTrigger.onTrue(m_intake.rollWheelCommand());
+    wheelTrigger.onFalse(m_intake.stopWheelCommand());
   }
+  
   
   private void defaultCommands() {
     m_chassis.setDefaultCommand(
         m_chassis.driveCommand(drive_controller, m_chassis)
     );
+
     m_shooter.setDefaultCommand(
       m_shooter.stopShooterCommand()
+    );
+
+    m_intake.setDefaultCommand(
+      m_intake.driveCommand(mech_controller, m_intake)
     );
   }
 

@@ -3,6 +3,8 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
@@ -55,7 +57,7 @@ public class Shooter extends SubsystemBase {
     // Motor front igual al back pero invertido
     frontConfig = motorConfig;
     frontConfig.inverted(true);
-
+    conveyorConfig.inverted(true);
     // Aplicar Configuraciones
     m_back.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     m_front.configure(frontConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -69,9 +71,6 @@ public class Shooter extends SubsystemBase {
     updateSmartDashboard();
   }
 
-  public void driveConveyor() {
-    m_conveyor.set(Constants.Shooter.SHOOTER_LINEFUEL_SPEED);
-  }
   public void stopMotors(){
     m_back.stopMotor();
     m_front.stopMotor();
@@ -88,10 +87,12 @@ public class Shooter extends SubsystemBase {
     // TroubleShooting
     SmartDashboard.putNumber("Back Target", backSpeed);
     SmartDashboard.putNumber("Front Target", frontSpeed);
+  }
+
+  public void updateSmartDashboard(){
+    SmartDashboard.putNumber("Conveyor Output", m_conveyor.getAppliedOutput());
     SmartDashboard.putNumber("Back Output", m_back.getAppliedOutput());
     SmartDashboard.putNumber("Front Output", m_front.getAppliedOutput());
-  }
-  public void updateSmartDashboard(){
     SmartDashboard.putNumber("Shooter Front Temp", frontTemp);
     SmartDashboard.putNumber("Shooter Back Temp", backTemp);
     SmartDashboard.putBoolean("Shooter Overheating", frontTemp > Constants.Shooter.OVERHEAT_TEMP || backTemp > Constants.Shooter.OVERHEAT_TEMP);
@@ -99,17 +100,21 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("BackSpeed", backEncoder.getVelocity());
   }
 
-  public void dumbShooterTest(){
-    m_back.set(0.8);
-    m_front.set(0.8);
+  public void setConveyor() {
+    m_conveyor.set(0.8);
   }
-  
+
+  public void dumbShooterBackTest(){
+    m_back.set(0.6);
+  }
+
+  public void dumbShooterFrontTest(){
+    m_front.set(0.4);
+  }
+
   // ====================COMMANDS====================
   public Command stopShooterCommand(){
     return Commands.runOnce(this::stopMotors, this);
-  }
-  public Command lineFuelCommand(){
-    return Commands.run(this::driveConveyor, this);
   }
   public Command driveShooterCommand(double speed){
     return Commands.run(()-> this.setShooter(speed),this);
@@ -121,7 +126,14 @@ public class Shooter extends SubsystemBase {
       stopShooterCommand()
     );
   }
-  public Command dumbTestCommand(){
-    return Commands.run(this::dumbShooterTest, this);
+  
+  public Command conveyorCommand(){
+    return Commands.run(this::setConveyor, this);
+  }
+  public Command dumbTestBackCommand(){
+    return Commands.run(this::dumbShooterBackTest, this);
+  }
+  public Command dumbTestFrontCommand(){
+    return Commands.run(this::dumbShooterFrontTest, this);
   }
 }

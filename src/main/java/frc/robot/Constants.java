@@ -20,7 +20,7 @@ public class Constants {
     public static final double kDeadBandRot = 0.1;
     public static final double kPIDThreshold = 0.5;
     public static final double MAX_SPEED_ms = 3.0;
-    public static final double MAX_ROTATION_SPEED_RAD_S = 1.0;
+    public static final double MAX_ROTATION_SPEED_RAD_S = 3.0;
     public static final double kTrackWidth = 0.6; //meters
     public static final double WHEEL_DIAMETER_INCHES = 6.0;
     public static final double ENCODER_TICK_RATIO = (Math.PI * Units.inchesToMeters(WHEEL_DIAMETER_INCHES))/128;
@@ -32,18 +32,18 @@ public class Constants {
     public static final double LIMIT_FWD = 20;
     public static final double INTAKE_WHEEL_SPEED = 0;
     public static final int ID_INTAKE_WHEEL = 9;
-    public static final double MAX_ARM_SPEED_PERCENT = 0;
-    public static final double INTAKE_ROLL_SPEED = 0;
+    public static final double MAX_ARM_SPEED_PERCENT = 0.3;
+    public static final double INTAKE_ROLL_SPEED = 0.45;
   }
 
-  public class Shooter{
+  public class Shooter{        
     public static final int ID_SHOOTER_BACK = 6;
     public static final int ID_SHOOTER_FRONT = 5;
     public static final int ID_SHOOTER_CONVEYOR = 7;
     public static final double SHOOTER_LINEFUEL_SPEED = 0.5;
     public static final double OVERHEAT_TEMP = 60.0;
     public static final double K_BACKSPIN = 0.3;
-    public static final double NEO_SAFE_RPM = 5400.0;
+    public static final double NEO_SAFE_RPM = 2400.0;
     public static final double MAX_RPM = NEO_SAFE_RPM;
     public static final double MAX_RPM_FRONT = NEO_SAFE_RPM/(2-K_BACKSPIN);
     public static final double kP = 0.00005;
