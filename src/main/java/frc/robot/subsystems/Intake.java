@@ -6,48 +6,48 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-
 import com.revrobotics.PersistMode;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
+
 public class Intake extends SubsystemBase {
   private final SparkMax m_arm = new SparkMax(Constants.Intake.ID_EXTDENDER, MotorType.kBrushless);
   private final SparkMax m_wheel = new SparkMax(Constants.Intake.ID_INTAKE_WHEEL, MotorType.kBrushless);   
   private SparkMaxConfig armConfig = new SparkMaxConfig();
   private SparkMaxConfig wheelConfig = new SparkMaxConfig();
   private SparkClosedLoopController armController = m_arm.getClosedLoopController();
-  private FeedForwardConfig armFeedForwardConfig = new FeedForwardConfig();
+  // private FeedForwardConfig armFeedForwardConfig = new FeedForwardConfig();
   private final RelativeEncoder armEncoder= m_arm.getEncoder();
     
   public Intake() {
     armConfig.idleMode(IdleMode.kBrake);
     wheelConfig.idleMode(IdleMode.kBrake);
-    armConfig.inverted(false);
+    armConfig.inverted(true);
     wheelConfig.inverted(false);
-
+    // armConfig.encoder.inverted(true);
     // Configure PID and FFWD
     armConfig.closedLoop
       .p(Constants.Intake.kP) // Los valores de PID son "Calibraciones" experimentales prueba y error. Recomendacion: Empieza con un valor que te de la funcion MAX_ERROR*kP = 1
       .i(Constants.Intake.kI)
       .d(Constants.Intake.kD);
-    armFeedForwardConfig.kV(0); // Obtener con SysID
-    armConfig.closedLoop.feedForward.apply(armFeedForwardConfig);
+    armConfig.closedLoopRampRate(0.25);
+    armConfig.openLoopRampRate(0.25);
+
+    // armFeedForwardConfig.kV(0); // Obtener con SysID
+    // armConfig.closedLoop.feedForward.apply(armFeedForwardConfig);
 
     m_arm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     m_wheel.configure(wheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  public void drive(double drive_speed){
+  private void drive(double drive_speed){
       if(Math.abs(drive_speed) > 1 ){
         drive_speed = drive_speed > 0 ? 1 : -1;
       }
@@ -57,28 +57,29 @@ public class Intake extends SubsystemBase {
       m_arm.set(motor_speed);
   }
 
-  public void setArmPosition(double position){
+  private void setArmPosition(double position){
     position = MathUtil.clamp(position, Constants.Intake.MIN_ARM_POSITION, Constants.Intake.MAX_ARM_POSITION);
     armController.setSetpoint(position, ControlType.kPosition);
   }
 
-  public void rollWheel() {
-    m_wheel.set(Constants.Intake.INTAKE_ROLL_SPEED);
+  private void rollWheel(int direction) {
+    m_wheel.set(armEncoder.getPosition()<5 ? 0 : direction * Constants.Intake.INTAKE_ROLL_SPEED);
   }
-  
-  public void rollBackWheel() {
-    m_wheel.set(-Constants.Intake.INTAKE_ROLL_SPEED);
-  }
-  public void stopWheel() {
+  private void stopWheel() {
     m_wheel.stopMotor();
   } 
-  public void resetEncoders(){
+  private void resetEncoders(){
     armEncoder.setPosition(0);
+  }
+
+  private void updateSmartDashboard(){
+    SmartDashboard.putNumber("Arm Position", armEncoder.getPosition());
+    SmartDashboard.putNumber("Arm Motor Temp", m_arm.getMotorTemperature());
   }
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Arm Position", armEncoder.getPosition());
+    updateSmartDashboard();
   }
 
   // ====================COMMANDS====================
@@ -97,13 +98,22 @@ public class Intake extends SubsystemBase {
     return output;
   }
   public Command rollWheelCommand(){
-    return Commands.runOnce(this::rollWheel, this);
+    return Commands.runOnce(()->this.rollWheel(1), this);
   }
   
   public Command rollBackWheelCommand(){
-    return Commands.runOnce(this::rollBackWheel, this);
+    return Commands.runOnce(()->this.rollWheel(-1), this);
   }
   public Command stopWheelCommand(){
     return Commands.runOnce(this::stopWheel, this);
+  }
+  public Command resetEncoderCommand(){
+    return Commands.runOnce(this::resetEncoders, this);
+  } 
+  public Command extendCommand(){
+    return Commands.run(()->this.setArmPosition(Constants.Intake.EXTENDED_POSITION), this);
+  }
+  public Command retractCommand(){
+    return Commands.run(()->this.setArmPosition(Constants.Intake.RETRACTED_POSITION),this);
   }
 }

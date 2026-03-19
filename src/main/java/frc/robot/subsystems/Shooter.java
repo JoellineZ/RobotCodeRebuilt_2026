@@ -3,8 +3,6 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
@@ -46,19 +44,25 @@ public class Shooter extends SubsystemBase {
     conveyorConfig.idleMode(IdleMode.kBrake);
     conveyorConfig.smartCurrentLimit(60, 80);
     motorConfig.smartCurrentLimit(60, 80);
-    motorConfig.closedLoop
-      .p(Constants.Shooter.kP)
-      .i(Constants.Shooter.kI)
-      .d(Constants.Shooter.kD);
     motorConfig.openLoopRampRate(0.5);
-    motorConfig.closedLoopRampRate(0.25);
-    motorConfig.closedLoop.outputRange(0, 1);
+    motorConfig.closedLoopRampRate(0.5);
+    motorConfig.closedLoop.outputRange(-1, 1);
     motorConfig.voltageCompensation(12);
     feedForwardConfig.kV(Constants.Shooter.kV);
     motorConfig.closedLoop.feedForward.apply(feedForwardConfig);
+    frontConfig = motorConfig;
+
+    motorConfig.closedLoop
+      .p(Constants.Shooter.kP_b)
+      .i(Constants.Shooter.kI_b)
+      .d(Constants.Shooter.kD_b);
+
+    frontConfig.closedLoop
+      .p(Constants.Shooter.kP_f)
+      .i(Constants.Shooter.kI_f)
+      .d(Constants.Shooter.kD_f);
 
     // Motor front igual al back pero invertido
-    frontConfig = motorConfig;
     frontConfig.inverted(true);
     conveyorConfig.inverted(true);
     // Aplicar Configuraciones
@@ -104,7 +108,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void setConveyor() {
-    m_conveyor.set(0.4);
+    m_conveyor.set(0.7);
   }
 
   public void dumbShooterBackTest(){
@@ -114,6 +118,11 @@ public class Shooter extends SubsystemBase {
   public void dumbShooterFrontTest(){
     m_front.set(0.4);
   }
+  
+  public void dumbShooterFrontReverseTest(){
+    m_front.set(-0.4);
+  }
+
 
   // ====================COMMANDS====================
   public Command stopShooterCommand(){
@@ -129,7 +138,18 @@ public class Shooter extends SubsystemBase {
       stopShooterCommand()
     );
   }
-  
+  public Command shooterPIDCommandMid(){
+    return Commands.run(()-> this.setShooter(2500),this);
+  }
+
+  public Command shooterPIDCommandClose(){
+    return Commands.run(()-> this.setShooter(1500),this);
+  }
+
+  public Command shooterPIDCommandFar(){
+    return Commands.run(()-> this.setShooter(3000),this);
+  }
+
   public Command conveyorCommand(){
     return Commands.run(this::setConveyor, this);
   }
@@ -138,5 +158,8 @@ public class Shooter extends SubsystemBase {
   }
   public Command dumbTestFrontCommand(){
     return Commands.run(this::dumbShooterFrontTest, this);
+  }
+  public Command dumbTestFrontReverseCommand(){
+    return Commands.run(this::dumbShooterFrontReverseTest, this);
   }
 }

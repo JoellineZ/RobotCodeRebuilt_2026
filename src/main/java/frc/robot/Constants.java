@@ -33,13 +33,15 @@ public class Constants {
     public static final double INTAKE_WHEEL_SPEED = 0;
     public static final int ID_INTAKE_WHEEL = 9;
     public static final double MAX_ARM_SPEED_PERCENT = 0.3;
-    public static final double INTAKE_ROLL_SPEED = 0.55;
-    public static final double kP = 0.02; // 
+    public static final double INTAKE_ROLL_SPEED = 0.3;
+    public static final double kP = 0.1; // 
     public static final double kI = 0;
-    public static final double kD = 0;
+    public static final double kD = 0.01;
     public static final double MIN_ARM_POSITION = 0;
-    public static final double MAX_ARM_POSITION = 0;
+    public static final double MAX_ARM_POSITION = 12.4;
     public static final double MAX_ERROR =50; //mm,error maximo
+    public static final double EXTENDED_POSITION = 12.4;
+    public static final double RETRACTED_POSITION = 0;
   }
 
   public class Shooter{        
@@ -48,14 +50,17 @@ public class Constants {
     public static final int ID_SHOOTER_CONVEYOR = 7;
     public static final double SHOOTER_LINEFUEL_SPEED = 0.5;
     public static final double OVERHEAT_TEMP = 60.0;
-    public static final double K_BACKSPIN = 0.3;
+    public static final double K_BACKSPIN = 0.6;
     public static final double NEO_SAFE_RPM = 2400.0;
     public static final double MAX_RPM = NEO_SAFE_RPM;
     public static final double MAX_RPM_FRONT = NEO_SAFE_RPM/(2-K_BACKSPIN);
-    public static final double kP = 0.00005;
-    public static final double kI = 0;
-    public static final double kD = 0;
-    public static final double kV = 1.0/NEO_SAFE_RPM;
+    public static final double kP_f = 0.00025;
+    public static final double kI_f = 0;
+    public static final double kD_f = 0.002;
+    public static final double kV = 0.45/NEO_SAFE_RPM;
+    public static final double kP_b = kP_f;
+    public static final double kI_b = 0;
+    public static final double kD_b = kD_f;
   }
 
   public class IO{
