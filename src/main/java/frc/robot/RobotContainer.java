@@ -25,7 +25,8 @@ public class RobotContainer {
   //public Trigger shooterStopTrigger = new JoystickButton(mech_controller, XboxController.Button.kX.value);
   public Trigger shootTrigger = new JoystickButton(mech_controller, XboxController.Button.kY.value);
   public Trigger shootBackTrigger = new JoystickButton(mech_controller, XboxController.Button.kB.value);
-  public Trigger wheelTrigger = new JoystickButton(mech_controller, XboxController.Button.kX.value); 
+  public Trigger wheelTrigger = new JoystickButton(mech_controller, XboxController.Button.kX.value);
+  public Trigger wheelBackTrigger = new JoystickButton(mech_controller, XboxController.Button.kRightBumper.value);
   public Trigger conveyorTrigger = new JoystickButton(mech_controller, XboxController.Button.kA.value);
 
   public RobotContainer() {
@@ -49,9 +50,11 @@ public class RobotContainer {
     shootTrigger.onFalse(m_shooter.stopShooterCommand());
     shootBackTrigger.onTrue(m_shooter.dumbTestBackCommand());
     shootBackTrigger.onFalse(m_shooter.stopShooterCommand());
-
+    
     wheelTrigger.onTrue(m_intake.rollWheelCommand());
     wheelTrigger.onFalse(m_intake.stopWheelCommand());
+    wheelBackTrigger.onTrue(m_intake.rollBackWheelCommand());
+    wheelBackTrigger.onFalse(m_intake.stopWheelCommand());
   }
   
   

@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 public class Intake extends SubsystemBase {
   private final SparkMax m_arm = new SparkMax(Constants.Intake.ID_EXTDENDER, MotorType.kBrushless);
-  private final SparkMax m_roller = new SparkMax(Constants.Intake.ID_INTAKE_WHEEL, MotorType.kBrushless);   
+  private final SparkMax m_wheel = new SparkMax(Constants.Intake.ID_INTAKE_WHEEL, MotorType.kBrushless);   
   private SparkMaxConfig armConfig = new SparkMaxConfig();
   private SparkMaxConfig wheelConfig = new SparkMaxConfig();
   private SparkClosedLoopController armController = m_arm.getClosedLoopController();
@@ -44,12 +44,7 @@ public class Intake extends SubsystemBase {
     armConfig.closedLoop.feedForward.apply(armFeedForwardConfig);
 
     m_arm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_roller.configure(wheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-  }
-
-
-  public void rollWheel() {
-    drive(Constants.Intake.INTAKE_WHEEL_SPEED);
+    m_wheel.configure(wheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   public void drive(double drive_speed){
@@ -67,11 +62,15 @@ public class Intake extends SubsystemBase {
     armController.setSetpoint(position, ControlType.kPosition);
   }
 
-  public void rollRoller() {
-    m_roller.set(Constants.Intake.INTAKE_ROLL_SPEED);
+  public void rollWheel() {
+    m_wheel.set(Constants.Intake.INTAKE_ROLL_SPEED);
   }
-  public void stopRoller() {
-    m_roller.stopMotor();
+  
+  public void rollBackWheel() {
+    m_wheel.set(-Constants.Intake.INTAKE_ROLL_SPEED);
+  }
+  public void stopWheel() {
+    m_wheel.stopMotor();
   } 
   public void resetEncoders(){
     armEncoder.setPosition(0);
@@ -98,9 +97,13 @@ public class Intake extends SubsystemBase {
     return output;
   }
   public Command rollWheelCommand(){
-    return Commands.runOnce(this::rollRoller, this);
+    return Commands.runOnce(this::rollWheel, this);
+  }
+  
+  public Command rollBackWheelCommand(){
+    return Commands.runOnce(this::rollBackWheel, this);
   }
   public Command stopWheelCommand(){
-    return Commands.runOnce(this::stopRoller, this);
+    return Commands.runOnce(this::stopWheel, this);
   }
 }

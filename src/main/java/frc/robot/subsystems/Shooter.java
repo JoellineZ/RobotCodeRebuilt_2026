@@ -44,6 +44,7 @@ public class Shooter extends SubsystemBase {
     // Configurar shooter motor defaults y conveyor
     motorConfig.idleMode(IdleMode.kCoast);
     conveyorConfig.idleMode(IdleMode.kBrake);
+    conveyorConfig.smartCurrentLimit(60, 80);
     motorConfig.smartCurrentLimit(60, 80);
     motorConfig.closedLoop
       .p(Constants.Shooter.kP)
@@ -103,7 +104,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void setConveyor() {
-    m_conveyor.set(0.8);
+    m_conveyor.set(0.4);
   }
 
   public void dumbShooterBackTest(){
