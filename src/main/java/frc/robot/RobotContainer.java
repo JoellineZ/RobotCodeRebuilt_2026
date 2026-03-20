@@ -23,7 +23,6 @@ public class RobotContainer {
   public Trigger stopChassisTrigger = new JoystickButton(drive_controller, XboxController.Button.kX.value);
 
   // Mech Triggers
-  public Trigger dumbTrigger = new JoystickButton(mech_controller, XboxController.Button.kStart.value);
   public Trigger wheelTrigger = new JoystickButton(mech_controller, XboxController.Button.kLeftBumper.value);
   public Trigger wheelBackTrigger = new JoystickButton(mech_controller, XboxController.Button.kRightBumper.value);
   public Trigger conveyorTrigger = new JoystickButton(mech_controller, XboxController.Button.kA.value);
@@ -43,8 +42,6 @@ public class RobotContainer {
       m_chassis.stopCommand(), 
       m_chassis.clearFaultsCommand()
     ));
-    dumbTrigger.onTrue(m_shooter.dumbTestFrontCommand());
-    dumbTrigger.onFalse(m_shooter.stopShooterCommand());
 
     conveyorTrigger.onTrue(m_shooter.conveyorCommand());
     conveyorTrigger.onFalse(m_shooter.stopShooterCommand());
@@ -75,9 +72,6 @@ public class RobotContainer {
   private void defaultCommands() {
     m_chassis.setDefaultCommand(
         m_chassis.driveCommand(drive_controller, m_chassis)
-    );
-    m_shooter.setDefaultCommand(
-      m_shooter.stopShooterCommand()
     );
     m_intake.setDefaultCommand(
       m_intake.driveCommand(mech_controller, m_intake)

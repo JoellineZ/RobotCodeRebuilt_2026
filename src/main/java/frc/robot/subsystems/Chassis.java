@@ -60,8 +60,6 @@ public class Chassis extends SubsystemBase {
     right2.setNeutralMode(NeutralMode.Brake);
     left1.setInverted(true);
     left2.setInverted(true);
-    // left1.configOpenloopRamp(Constants.Chassis.kLoopRamp);
-    // right1.configOpenloopRamp(Constants.Chassis.kLoopRamp);
     
       l_encoder = new Encoder(Constants.Chassis.ID_ENCODER_LEFT1, Constants.Chassis.ID_ENCODER_LEFT2);
       r_encoder = new Encoder(Constants.Chassis.ID_ENCODER_RIGHT1, Constants.Chassis.ID_ENCODER_RIGHT2);

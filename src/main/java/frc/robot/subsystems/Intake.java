@@ -23,7 +23,6 @@ public class Intake extends SubsystemBase {
   private SparkMaxConfig armConfig = new SparkMaxConfig();
   private SparkMaxConfig wheelConfig = new SparkMaxConfig();
   private SparkClosedLoopController armController = m_arm.getClosedLoopController();
-  // private FeedForwardConfig armFeedForwardConfig = new FeedForwardConfig();
   private final RelativeEncoder armEncoder= m_arm.getEncoder();
     
   public Intake() {
@@ -31,17 +30,12 @@ public class Intake extends SubsystemBase {
     wheelConfig.idleMode(IdleMode.kBrake);
     armConfig.inverted(true);
     wheelConfig.inverted(false);
-    // armConfig.encoder.inverted(true);
-    // Configure PID and FFWD
     armConfig.closedLoop
       .p(Constants.Intake.kP) // Los valores de PID son "Calibraciones" experimentales prueba y error. Recomendacion: Empieza con un valor que te de la funcion MAX_ERROR*kP = 1
       .i(Constants.Intake.kI)
       .d(Constants.Intake.kD);
     armConfig.closedLoopRampRate(0.25);
     armConfig.openLoopRampRate(0.25);
-
-    // armFeedForwardConfig.kV(0); // Obtener con SysID
-    // armConfig.closedLoop.feedForward.apply(armFeedForwardConfig);
 
     m_arm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     m_wheel.configure(wheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -86,8 +80,8 @@ public class Intake extends SubsystemBase {
   public Command driveCommand (XboxController controller, Intake m_intake){
     return Commands.run(
       ()->this.drive(
-        controller.getRawAxis(XboxController.Axis.kRightTrigger.value)
-        -controller.getRawAxis(XboxController.Axis.kLeftTrigger.value))
+        controller.getRawAxis(Constants.IO.ID_JOYSTICK_SPEED)
+        -controller.getRawAxis(Constants.IO.ID_JOYSTICK_BRAKE))
         ,this);
   }
   private double stopAtLimit(double input){
@@ -97,6 +91,7 @@ public class Intake extends SubsystemBase {
     }
     return output;
   }
+  
   public Command rollWheelCommand(){
     return Commands.runOnce(()->this.rollWheel(1), this);
   }

@@ -40,7 +40,6 @@ public class Shooter extends SubsystemBase {
 
   @SuppressWarnings("removal") // Reset y Safe Parameters de SparkConfig
   public Shooter() {
-    // Configurar shooter motor defaults y conveyor
     motorConfig.idleMode(IdleMode.kCoast);
     frontConfig.idleMode(IdleMode.kCoast);
     conveyorConfig.idleMode(IdleMode.kBrake);
@@ -60,19 +59,16 @@ public class Shooter extends SubsystemBase {
     frontConfig.voltageCompensation(12);
     frontConfig.closedLoop.feedForward.apply(feedForwardConfig);
     
-
     motorConfig.closedLoop
       .p(Constants.Shooter.kP_b)
       .i(Constants.Shooter.kI_b)
       .d(Constants.Shooter.kD_b);
-
-
+    
     frontConfig.closedLoop
       .p(Constants.Shooter.kP_f)
       .i(Constants.Shooter.kI_f)
       .d(Constants.Shooter.kD_f);
-
-    // Motor front igual al back pero invertido
+    
     conveyorConfig.inverted(true);
     frontConfig.inverted(true);
     // Aplicar Configuraciones
@@ -97,10 +93,8 @@ public class Shooter extends SubsystemBase {
     speed = MathUtil.clamp(speed, 0, Constants.Shooter.MAX_RPM);
     double frontSpeed = speed;
     double backSpeed = speed;
-
     backController.setSetpoint(backSpeed, ControlType.kVelocity);
     frontController.setSetpoint(frontSpeed, ControlType.kVelocity);
-
     // TroubleShooting
     SmartDashboard.putNumber("Back Target", backSpeed);
     SmartDashboard.putNumber("Front Target", frontSpeed);
@@ -120,21 +114,7 @@ public class Shooter extends SubsystemBase {
   public void setConveyor() {
     m_conveyor.set(0.7);
   }
-
-  public void dumbShooterBackTest(){
-    m_back.set(0.6);
-  }
-
-  public void dumbShooterFrontTest(){
-    m_front.set(0.5);
-    m_back.set(0.5);
-  }
   
-  public void dumbShooterFrontReverseTest(){
-    m_front.set(-0.4);
-  }
-
-
   // ====================COMMANDS====================
   public Command stopShooterCommand(){
     return Commands.runOnce(this::stopMotors, this);
@@ -163,14 +143,5 @@ public class Shooter extends SubsystemBase {
 
   public Command conveyorCommand(){
     return Commands.run(this::setConveyor, this);
-  }
-  public Command dumbTestBackCommand(){
-    return Commands.run(this::dumbShooterBackTest, this);
-  }
-  public Command dumbTestFrontCommand(){
-    return Commands.run(this::dumbShooterFrontTest, this);
-  }
-  public Command dumbTestFrontReverseCommand(){
-    return Commands.run(this::dumbShooterFrontReverseTest, this);
   }
 }
