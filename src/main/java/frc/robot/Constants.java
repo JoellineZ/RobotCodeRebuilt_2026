@@ -22,8 +22,14 @@ public class Constants {
     public static final double MAX_SPEED_ms = 3.0;
     public static final double MAX_ROTATION_SPEED_RAD_S = 3.0;
     public static final double kTrackWidth = 0.6; //meters
-    public static final double WHEEL_DIAMETER_INCHES = 6.0;
+    public static final double WHEEL_DIAMETER_INCHES = 15.24; //cm = 6 inches
     public static final double ENCODER_TICK_RATIO = (Math.PI * Units.inchesToMeters(WHEEL_DIAMETER_INCHES))/128;
+    public static final double kS = 0.1;
+    public static final double kV = 0.2;
+    public static final double kA = 0.3;
+    public static final double kP = 1.0;
+    public static final double kI = 0.1;
+    public static final double kD = 0.1;
   }
 
   public class Intake{
@@ -70,5 +76,5 @@ public class Constants {
     public static final int ID_JOYSTICK_SPEED = XboxController.Axis.kLeftTrigger.value;
     public static final int ID_JOYSTICK_ROT = 0;
     public static final int ID_JOYSTICK_BRAKE = XboxController.Axis.kRightTrigger.value;
-  }
+}
 }

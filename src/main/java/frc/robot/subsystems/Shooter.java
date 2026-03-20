@@ -29,6 +29,7 @@ public class Shooter extends SubsystemBase {
   private SparkMaxConfig motorConfig = new SparkMaxConfig();
   private SparkMaxConfig frontConfig = new SparkMaxConfig();
   private SparkMaxConfig conveyorConfig = new SparkMaxConfig();
+  public SparkMaxConfig reConfig = new SparkMaxConfig();
   private RelativeEncoder backEncoder = m_back.getEncoder();
   private RelativeEncoder frontEncoder = m_front.getEncoder();
   private SparkClosedLoopController backController = m_back.getClosedLoopController();
@@ -41,6 +42,7 @@ public class Shooter extends SubsystemBase {
   public Shooter() {
     // Configurar shooter motor defaults y conveyor
     motorConfig.idleMode(IdleMode.kCoast);
+    frontConfig.idleMode(IdleMode.kCoast);
     conveyorConfig.idleMode(IdleMode.kBrake);
     conveyorConfig.smartCurrentLimit(60, 80);
     motorConfig.smartCurrentLimit(60, 80);
@@ -50,12 +52,20 @@ public class Shooter extends SubsystemBase {
     motorConfig.voltageCompensation(12);
     feedForwardConfig.kV(Constants.Shooter.kV);
     motorConfig.closedLoop.feedForward.apply(feedForwardConfig);
-    frontConfig = motorConfig;
+    
+    frontConfig.smartCurrentLimit(60, 80);
+    frontConfig.openLoopRampRate(0.5);
+    frontConfig.closedLoopRampRate(0.5);
+    frontConfig.closedLoop.outputRange(-1, 1);
+    frontConfig.voltageCompensation(12);
+    frontConfig.closedLoop.feedForward.apply(feedForwardConfig);
+    
 
     motorConfig.closedLoop
       .p(Constants.Shooter.kP_b)
       .i(Constants.Shooter.kI_b)
       .d(Constants.Shooter.kD_b);
+
 
     frontConfig.closedLoop
       .p(Constants.Shooter.kP_f)
@@ -63,8 +73,8 @@ public class Shooter extends SubsystemBase {
       .d(Constants.Shooter.kD_f);
 
     // Motor front igual al back pero invertido
-    frontConfig.inverted(true);
     conveyorConfig.inverted(true);
+    frontConfig.inverted(true);
     // Aplicar Configuraciones
     m_back.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     m_front.configure(frontConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -84,9 +94,9 @@ public class Shooter extends SubsystemBase {
     m_conveyor.stopMotor();
   }
   public void setShooter(double speed){
-    speed = MathUtil.clamp(speed, 0, Constants.Shooter.MAX_RPM_FRONT);
+    speed = MathUtil.clamp(speed, 0, Constants.Shooter.MAX_RPM);
     double frontSpeed = speed;
-    double backSpeed = speed*(2.0-Constants.Shooter.K_BACKSPIN);
+    double backSpeed = speed;
 
     backController.setSetpoint(backSpeed, ControlType.kVelocity);
     frontController.setSetpoint(frontSpeed, ControlType.kVelocity);
@@ -116,7 +126,8 @@ public class Shooter extends SubsystemBase {
   }
 
   public void dumbShooterFrontTest(){
-    m_front.set(0.4);
+    m_front.set(0.5);
+    m_back.set(0.5);
   }
   
   public void dumbShooterFrontReverseTest(){
