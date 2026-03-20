@@ -22,7 +22,7 @@ public class Constants {
     public static final double MAX_SPEED_ms = 3.0;
     public static final double MAX_ROTATION_SPEED_RAD_S = 3.0;
     public static final double kTrackWidth = 0.6; //meters
-    public static final double WHEEL_DIAMETER_INCHES = 15.24; //cm = 6 inches
+    public static final double WHEEL_DIAMETER_INCHES = 6.0; //inches
     public static final double ENCODER_TICK_RATIO = (Math.PI * Units.inchesToMeters(WHEEL_DIAMETER_INCHES))/128;
     public static final double kS = 0.1;
     public static final double kV = 0.2;

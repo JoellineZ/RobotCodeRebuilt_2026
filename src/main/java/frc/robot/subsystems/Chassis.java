@@ -2,9 +2,11 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -17,13 +19,15 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 public class Chassis extends SubsystemBase {
   private final WPI_TalonSRX left1 = new WPI_TalonSRX(Constants.Chassis.ID_CH_LF1);
   private final WPI_TalonSRX left2 = new WPI_TalonSRX(Constants.Chassis.ID_CH_LF2);
   private final WPI_TalonSRX right1 = new WPI_TalonSRX(Constants.Chassis.ID_CH_RG1);
   private final WPI_TalonSRX right2 = new WPI_TalonSRX(Constants.Chassis.ID_CH_RG2);
-  
   private final PIDController m_pidController = new PIDController(
     Constants.Chassis.kP,
     Constants.Chassis.kI, 
@@ -44,6 +48,7 @@ public class Chassis extends SubsystemBase {
   
   // Pathplanner
   private DifferentialDriveOdometry m_odometry;
+  
   public double rot_monitor;
 
   public Chassis() {
@@ -63,6 +68,7 @@ public class Chassis extends SubsystemBase {
       l_encoder.setDistancePerPulse(Constants.Chassis.ENCODER_TICK_RATIO);
       r_encoder.setDistancePerPulse(Constants.Chassis.ENCODER_TICK_RATIO);
       r_encoder.setReverseDirection(true);
+      
       l_encoder.reset();
       r_encoder.reset();
       gyro.zeroYaw();
@@ -80,48 +86,68 @@ public class Chassis extends SubsystemBase {
         new Pose2d()
       );
     
-    getOdometry();
+    //getOdometry();
     }catch(Exception e){
       System.out.println("Gyro or Encoders not found, Odometry disabled");
     }
-
+    m_odometry = new DifferentialDriveOdometry(
+    Rotation2d.fromDegrees(gyro.getYaw()), l_encoder.getDistance(), r_encoder.getDistance());
     
   }
-
-  private void getOdometry(){
-    // FOR GPIO/DIO use try catch to avoid failure on robot Init
-    try{ 
-      
-      
-      double previusTime = Timer.getFPGATimestamp();
-      double previusTicks = (l_encoder.get() + r_encoder.get()) / 2.0; // Average of both encoders for better accuracy
-      wait();
-      double realTime = Timer.getFPGATimestamp();
-      double realTicks = (l_encoder.get() + r_encoder.get()) / 2.0; // Average of both encoders for better accuracy
-      double dx = (realTicks - previusTicks) * Math.PI*Constants.Chassis.WHEEL_DIAMETER_INCHES;
-      double dt = realTime - previusTime;
-      double velocity = dx/dt;
-      double acelinit = velocity/dt;
-      // =========WPI==========
-      // double velocity = dx/dt;
-      // double distance = dx;
-      
-      
-      SmartDashboard.putNumber("Odometry Distance", dx);
-      SmartDashboard.putNumber("Odometry Time", dt);
-      SmartDashboard.putNumber("Odometry Velocity", velocity);
-      odometry_engaged = true;
-    } catch(Exception e){
-      odometry_engaged=false;
-    }finally{
-      SmartDashboard.putBoolean("Encoder Stat", odometry_engaged);
-      
-    }
+  public void updateOdometry(){
+    m_odometry.update(gyro.getRotation2d(), l_encoder.getDistance(),r_encoder.getDistance());
   }
+  //private void getOdometry(){
+  //  // FOR GPIO/DIO use try catch to avoid failure on robot Init
+  //  try{ 
+  //    updateOdometry();
+  //    Pose2d pose = m_odometry.getPoseMeters();
+  //    double previusTime = Timer.getFPGATimestamp();
+  //    double previusTicks = (l_encoder.get() + r_encoder.get()) / 2.0; // Average of both encoders for better accuracy
+  //    double realTime = Timer.getFPGATimestamp();
+  //    double realTicks = (l_encoder.get() + r_encoder.get()) / 2.0; // Average of both encoders for better accuracy
+  //    double dx = (realTicks - previusTicks) * Math.PI*Constants.Chassis.WHEEL_DIAMETER_INCHES;
+  //    double dt = realTime - previusTime;
+  //    double velocity = dx/dt;
+  //    double acelinit = velocity/dt;
+  //    // =========WPI==========
+  //    // double velocity = dx/dt;
+  //    // double distance = dx;
+  //    
+  //    
+  //    SmartDashboard.putNumber("Odometry Distance", dx);
+  //    SmartDashboard.putNumber("Odometry Time", dt);
+  //    SmartDashboard.putNumber("Odometry Velocity", velocity);
+  //    odometry_engaged = true;
+  //  } catch(Exception e){
+  //    odometry_engaged=false;
+  //  }finally{
+  //    SmartDashboard.putBoolean("Encoder Stat", odometry_engaged);
+  //    
+  //  }
+  //}
   @Override
   public void periodic() {
     SmartDashboard();
+    m_odometry.update(
+        Rotation2d.fromDegrees(gyro.getYaw()),
+        l_encoder.getDistance(),
+        r_encoder.getDistance()
+    );
   }
+  Pose2d pose = m_odometry.getPoseMeters();
+  double x = pose.getX();
+  double y = pose.getY();
+  double theta = pose.getRotation().getDegrees();
+
+  public void resetOdometry(Pose2d pose) {
+    m_odometry.resetPosition(
+        Rotation2d.fromDegrees(gyro.getYaw()),
+        l_encoder.getDistance(),
+        r_encoder.getDistance(),
+        pose
+    );
+}
 
   public void drive(ChassisSpeeds chassisSpeeds){
     var wheelSpeeds = m_kinematics.toWheelSpeeds(chassisSpeeds);
@@ -156,7 +182,6 @@ public class Chassis extends SubsystemBase {
   private void SmartDashboard(){
     SmartDashboard.putBoolean("Odometry Engaged", odometry_engaged);
     if (odometry_engaged){
-        m_odometry.update(gyro.getRotation2d(), l_encoder.getDistance(), r_encoder.getDistance());
         SmartDashboard.putNumber("Robot X", m_odometry.getPoseMeters().getX());
         SmartDashboard.putNumber("Robot Y", m_odometry.getPoseMeters().getY());
         SmartDashboard.putNumber("Robot Rotation", m_odometry.getPoseMeters().getRotation().getDegrees());

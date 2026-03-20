@@ -1,6 +1,8 @@
 package frc.robot;
 
 import java.net.ContentHandler;
+
+import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -65,7 +67,7 @@ public class RobotContainer {
     extendIntakeTrigger.whileTrue(m_intake.extendCommand());
 
     retractIntakeTrigger.whileTrue(m_intake.retractCommand());
-
+  
     Command resetArmEncoderCommand = m_intake.resetEncoderCommand();
     SmartDashboard.putData("Reset Arm Encoder", resetArmEncoderCommand);
   }
@@ -83,6 +85,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return AutoBuilder.buildAuto("NombreDeTuPath");;
+    return AutoBuilder.buildAuto("NombreDeTuPath");
   }
 }
