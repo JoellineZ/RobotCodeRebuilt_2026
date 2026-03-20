@@ -62,7 +62,7 @@ public class Chassis extends SubsystemBase {
     left2.setInverted(true);
     // left1.configOpenloopRamp(Constants.Chassis.kLoopRamp);
     // right1.configOpenloopRamp(Constants.Chassis.kLoopRamp);
-    try{
+    
       l_encoder = new Encoder(Constants.Chassis.ID_ENCODER_LEFT1, Constants.Chassis.ID_ENCODER_LEFT2);
       r_encoder = new Encoder(Constants.Chassis.ID_ENCODER_RIGHT1, Constants.Chassis.ID_ENCODER_RIGHT2);
       l_encoder.setDistancePerPulse(Constants.Chassis.ENCODER_TICK_RATIO);
@@ -78,54 +78,16 @@ public class Chassis extends SubsystemBase {
         l_encoder.getDistance(), 
         r_encoder.getDistance()
       );
-      
       m_odometry.resetPosition(
         gyro.getRotation2d(), 
         l_encoder.getDistance(), 
         r_encoder.getDistance(), 
         new Pose2d()
       );
-    
-    //getOdometry();
-    }catch(Exception e){
-      System.out.println("Gyro or Encoders not found, Odometry disabled");
-    }
-    m_odometry = new DifferentialDriveOdometry(
-    Rotation2d.fromDegrees(gyro.getYaw()), l_encoder.getDistance(), r_encoder.getDistance());
-    
-  }
+}
   public void updateOdometry(){
-    m_odometry.update(gyro.getRotation2d(), l_encoder.getDistance(),r_encoder.getDistance());
+    m_odometry.update(Rotation2d.fromDegrees(gyro.getYaw()), l_encoder.getDistance(),r_encoder.getDistance());
   }
-  //private void getOdometry(){
-  //  // FOR GPIO/DIO use try catch to avoid failure on robot Init
-  //  try{ 
-  //    updateOdometry();
-  //    Pose2d pose = m_odometry.getPoseMeters();
-  //    double previusTime = Timer.getFPGATimestamp();
-  //    double previusTicks = (l_encoder.get() + r_encoder.get()) / 2.0; // Average of both encoders for better accuracy
-  //    double realTime = Timer.getFPGATimestamp();
-  //    double realTicks = (l_encoder.get() + r_encoder.get()) / 2.0; // Average of both encoders for better accuracy
-  //    double dx = (realTicks - previusTicks) * Math.PI*Constants.Chassis.WHEEL_DIAMETER_INCHES;
-  //    double dt = realTime - previusTime;
-  //    double velocity = dx/dt;
-  //    double acelinit = velocity/dt;
-  //    // =========WPI==========
-  //    // double velocity = dx/dt;
-  //    // double distance = dx;
-  //    
-  //    
-  //    SmartDashboard.putNumber("Odometry Distance", dx);
-  //    SmartDashboard.putNumber("Odometry Time", dt);
-  //    SmartDashboard.putNumber("Odometry Velocity", velocity);
-  //    odometry_engaged = true;
-  //  } catch(Exception e){
-  //    odometry_engaged=false;
-  //  }finally{
-  //    SmartDashboard.putBoolean("Encoder Stat", odometry_engaged);
-  //    
-  //  }
-  //}
   @Override
   public void periodic() {
     SmartDashboard();
@@ -135,12 +97,8 @@ public class Chassis extends SubsystemBase {
         r_encoder.getDistance()
     );
   }
-  Pose2d pose = m_odometry.getPoseMeters();
-  double x = pose.getX();
-  double y = pose.getY();
-  double theta = pose.getRotation().getDegrees();
 
-  public void resetOdometry(Pose2d pose) {
+  public void resetdometry(Pose2d pose) {
     m_odometry.resetPosition(
         Rotation2d.fromDegrees(gyro.getYaw()),
         l_encoder.getDistance(),
@@ -182,9 +140,6 @@ public class Chassis extends SubsystemBase {
   private void SmartDashboard(){
     SmartDashboard.putBoolean("Odometry Engaged", odometry_engaged);
     if (odometry_engaged){
-        SmartDashboard.putNumber("Robot X", m_odometry.getPoseMeters().getX());
-        SmartDashboard.putNumber("Robot Y", m_odometry.getPoseMeters().getY());
-        SmartDashboard.putNumber("Robot Rotation", m_odometry.getPoseMeters().getRotation().getDegrees());
       SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
       SmartDashboard.putNumber("Gyro Pitch", gyro.getPitch());
       SmartDashboard.putNumber("Gyro Roll", gyro.getRoll());

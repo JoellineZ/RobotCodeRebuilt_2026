@@ -10,10 +10,10 @@ public class Constants {
     public static final int ID_CH_LF2 = 2;
     public static final int ID_CH_RG1 = 3;
     public static final int ID_CH_RG2 = 4;
-    public static final int ID_ENCODER_RIGHT1 = 0; // Encoders not yet connected to RIO, ID 0S are placeholders
-    public static final int ID_ENCODER_RIGHT2 = 0;
-    public static final int ID_ENCODER_LEFT1 = 0;
-    public static final int ID_ENCODER_LEFT2 = 0;
+    public static final int ID_ENCODER_RIGHT1 = 1; // Encoders not yet connected to RIO, ID 0S are placeholders
+    public static final int ID_ENCODER_RIGHT2 = 2;
+    public static final int ID_ENCODER_LEFT1 = 3;
+    public static final int ID_ENCODER_LEFT2 = 4;
     public static final double kRot = 1;
     public static final double kLoopRamp = 0.1;
     public static final double kDeadBandSpeed = 0.05;
