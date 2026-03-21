@@ -6,14 +6,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.units.measure.MutDistance;
 import edu.wpi.first.units.measure.MutLinearVelocity;
 import edu.wpi.first.units.measure.MutVoltage;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,18 +27,23 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPLTVController;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
-import edu.wpi.first.math.geometry.Rotation2d;
 
 public class Chassis extends SubsystemBase {
   private final WPI_TalonSRX left1 = new WPI_TalonSRX(Constants.Chassis.ID_CH_LF1);
   private final WPI_TalonSRX left2 = new WPI_TalonSRX(Constants.Chassis.ID_CH_LF2);
   private final WPI_TalonSRX right1 = new WPI_TalonSRX(Constants.Chassis.ID_CH_RG1);
   private final WPI_TalonSRX right2 = new WPI_TalonSRX(Constants.Chassis.ID_CH_RG2);
-  private final PIDController m_pidController = new PIDController(
+  private final PIDController rightPIDController = new PIDController(
+    Constants.Chassis.kP,
+    Constants.Chassis.kI, 
+    Constants.Chassis.kD
+  );
+  private final PIDController leftPIDController = new PIDController(
     Constants.Chassis.kP,
     Constants.Chassis.kI, 
     Constants.Chassis.kD
@@ -71,29 +75,58 @@ public class Chassis extends SubsystemBase {
     right2.setNeutralMode(NeutralMode.Brake);
     left1.setInverted(true);
     left2.setInverted(true);
+
+    l_encoder = new Encoder(Constants.Chassis.ID_ENCODER_LEFT1, Constants.Chassis.ID_ENCODER_LEFT2);
+    r_encoder = new Encoder(Constants.Chassis.ID_ENCODER_RIGHT1, Constants.Chassis.ID_ENCODER_RIGHT2);
+    l_encoder.setDistancePerPulse(Constants.Chassis.ENCODER_TICK_RATIO);
+    r_encoder.setDistancePerPulse(Constants.Chassis.ENCODER_TICK_RATIO);
+    r_encoder.setReverseDirection(true);
     
-      l_encoder = new Encoder(Constants.Chassis.ID_ENCODER_LEFT1, Constants.Chassis.ID_ENCODER_LEFT2);
-      r_encoder = new Encoder(Constants.Chassis.ID_ENCODER_RIGHT1, Constants.Chassis.ID_ENCODER_RIGHT2);
-      l_encoder.setDistancePerPulse(Constants.Chassis.ENCODER_TICK_RATIO);
-      r_encoder.setDistancePerPulse(Constants.Chassis.ENCODER_TICK_RATIO);
-      r_encoder.setReverseDirection(true);
-      
-      l_encoder.reset();
-      r_encoder.reset();
-      gyro.zeroYaw();
-      gyro.reset();
-      m_odometry = new DifferentialDriveOdometry(
-        gyro.getRotation2d(), 
-        l_encoder.getDistance(), 
-        r_encoder.getDistance()
-      );
-      m_odometry.resetPosition(
-        gyro.getRotation2d(), 
-        l_encoder.getDistance(), 
-        r_encoder.getDistance(), 
-        new Pose2d()
-      );
-}
+    l_encoder.reset();
+    r_encoder.reset();
+    gyro.zeroYaw();
+    gyro.reset();
+
+    m_odometry = new DifferentialDriveOdometry(
+      gyro.getRotation2d(), 
+      l_encoder.getDistance(), 
+      r_encoder.getDistance()
+    );
+    m_odometry.resetPosition(
+      gyro.getRotation2d(), 
+      l_encoder.getDistance(), 
+      r_encoder.getDistance(), 
+      new Pose2d()
+    );
+
+    // =====PATHPLANNER CONFIG=====
+    RobotConfig config;
+    try{
+      config = RobotConfig.fromGUISettings();
+    } catch (Exception e){
+      e.printStackTrace();
+      config = null;
+    }
+
+    if(config != null){
+      AutoBuilder.configure(
+        this::getPose,
+        this::resetPose, 
+        this::getRobotRelativeSpeeds, 
+        (speeds, feedforwards)->drive(speeds), 
+        new PPLTVController(0.02), 
+        config, 
+        ()-> {
+          var alliance = DriverStation.getAlliance();
+          if(alliance.isPresent()){
+            return alliance.get() == DriverStation.Alliance.Red;
+          } else {
+            return false; // Default to blue if alliance information is not available 
+          }
+        },
+        this);
+    }
+  }
   public void updateOdometry(){
     m_odometry.update(Rotation2d.fromDegrees(gyro.getYaw()), l_encoder.getDistance(),r_encoder.getDistance());
   }
@@ -108,13 +141,23 @@ public class Chassis extends SubsystemBase {
   }
 
   public void resetdometry(Pose2d pose) {
+    l_encoder.reset();
+    r_encoder.reset();
     m_odometry.resetPosition(
         Rotation2d.fromDegrees(gyro.getYaw()),
         l_encoder.getDistance(),
         r_encoder.getDistance(),
         pose
     );
-}
+  }
+
+  public ChassisSpeeds getRobotRelativeSpeeds(){
+    return m_kinematics.toChassisSpeeds(
+      new DifferentialDriveWheelSpeeds(
+        l_encoder.getRate(),
+        r_encoder.getRate())
+      );
+  }
 
   public void drive(ChassisSpeeds chassisSpeeds){
     var wheelSpeeds = m_kinematics.toWheelSpeeds(chassisSpeeds);
@@ -163,6 +206,21 @@ public class Chassis extends SubsystemBase {
     right1.clearStickyFaults();
     right2.clearStickyFaults();
     System.out.println("Successfully Cleared Drivetrain controllers Sticky Faults");
+  }
+
+  // ============= PATHPLANNER METHODS =============
+  public Pose2d getPose(){
+    if(!odometry_engaged) return new Pose2d(); // Si no hay odometría devuelve un placeholder
+    return m_odometry.getPoseMeters();
+  }
+
+  public void resetPose(Pose2d pose){
+    m_odometry.resetPosition(
+      Rotation2d.fromDegrees(gyro.getYaw()), 
+      l_encoder.getDistance(), 
+      r_encoder.getDistance(), 
+      pose
+    );
   }
 
 

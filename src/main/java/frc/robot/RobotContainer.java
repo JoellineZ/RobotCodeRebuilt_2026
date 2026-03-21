@@ -1,9 +1,10 @@
 package frc.robot;
 
-import java.net.ContentHandler;
-
 import com.pathplanner.lib.auto.AutoBuilder;
+
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -17,7 +18,8 @@ public class RobotContainer {
   public Intake m_intake = new Intake();
   public climber m_climber = new climber();
   public XboxController drive_controller = new XboxController(Constants.IO.ID_DRIVER_CHASSIS);
-  public XboxController mech_controller = new XboxController(Constants.IO.ID_DRIVER_MECH);
+  public XboxController mech_controller = new XboxController(Constants.IO.ID_DRIVER_MECH);  
+  private final SendableChooser<Command> autoChooser;
   
   // Chassis Triggers
   public Trigger stopChassisTrigger = new JoystickButton(drive_controller, XboxController.Button.kX.value);
@@ -33,6 +35,13 @@ public class RobotContainer {
   public Trigger retractIntakeTrigger = new Trigger(()->mech_controller.getLeftY()>0.6);
 
   public RobotContainer() {
+    boolean isCompetition = DriverStation.isFMSAttached();
+    autoChooser = AutoBuilder.buildAutoChooserWithOptionsModifier(
+      (stream)-> isCompetition
+        ? stream.filter(auto->auto.getName().contains("Comp"))
+        : stream
+    );
+    SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();
     defaultCommands();
   }
@@ -79,6 +88,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return AutoBuilder.buildAuto("NombreDeTuPath");
+    return autoChooser.getSelected();
   }
 }
