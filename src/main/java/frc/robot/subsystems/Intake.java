@@ -106,9 +106,9 @@ public class Intake extends SubsystemBase {
     return Commands.runOnce(this::resetEncoders, this);
   } 
   public Command extendCommand(){
-    return Commands.run(()->this.setArmPosition(Constants.Intake.EXTENDED_POSITION), this);
+    return Commands.run(()->this.setArmPosition(Constants.Intake.EXTENDED_POSITION), this).until(()->Math.abs(armEncoder.getPosition()-Constants.Intake.EXTENDED_POSITION)<Constants.Intake.MAX_ERROR);
   }
   public Command retractCommand(){
-    return Commands.run(()->this.setArmPosition(Constants.Intake.RETRACTED_POSITION),this);
+    return Commands.run(()->this.setArmPosition(Constants.Intake.RETRACTED_POSITION),this).until(()->Math.abs(armEncoder.getPosition()-Constants.Intake.RETRACTED_POSITION)<Constants.Intake.MAX_ERROR);
   }
 }

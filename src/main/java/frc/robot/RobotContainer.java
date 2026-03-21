@@ -70,9 +70,9 @@ public class RobotContainer {
     wheelBackTrigger.onTrue(m_intake.rollBackWheelCommand());
     wheelBackTrigger.onFalse(m_intake.stopWheelCommand());
 
-    extendIntakeTrigger.whileTrue(m_intake.extendCommand());
+    extendIntakeTrigger.onTrue(m_intake.extendCommand());
 
-    retractIntakeTrigger.whileTrue(m_intake.retractCommand());
+    retractIntakeTrigger.onTrue(m_intake.retractCommand());
   
     Command resetArmEncoderCommand = m_intake.resetEncoderCommand();
     SmartDashboard.putData("Reset Arm Encoder", resetArmEncoderCommand);

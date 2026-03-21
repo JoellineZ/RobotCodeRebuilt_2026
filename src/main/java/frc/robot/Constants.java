@@ -36,7 +36,6 @@ public class Constants {
     public static final int ID_EXTDENDER = 8;
     public static final double LIMIT_BWD = 0;
     public static final double LIMIT_FWD = 20;
-    public static final double INTAKE_WHEEL_SPEED = 0;
     public static final int ID_INTAKE_WHEEL = 9;
     public static final double MAX_ARM_SPEED_PERCENT = 0.3;
     public static final double INTAKE_ROLL_SPEED = 0.3;
@@ -45,7 +44,7 @@ public class Constants {
     public static final double kD = 0.01;
     public static final double MIN_ARM_POSITION = 0;
     public static final double MAX_ARM_POSITION = 12.4;
-    public static final double MAX_ERROR =50; //mm,error maximo
+    public static final double MAX_ERROR =0.25; //Rotations
     public static final double EXTENDED_POSITION = 12.4;
     public static final double RETRACTED_POSITION = 0;
   }
