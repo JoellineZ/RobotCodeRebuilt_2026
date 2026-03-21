@@ -7,14 +7,25 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.MutDistance;
+import edu.wpi.first.units.measure.MutLinearVelocity;
+import edu.wpi.first.units.measure.MutVoltage;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.studica.frc.AHRS;
@@ -90,7 +101,7 @@ public class Chassis extends SubsystemBase {
   }
   @Override
   public void periodic() {
-    SmartDashboard();
+    updateSmartDashboard();
     m_odometry.update(
         Rotation2d.fromDegrees(gyro.getYaw()),
         l_encoder.getDistance(),
@@ -137,7 +148,7 @@ public class Chassis extends SubsystemBase {
     return true;
   }
 
-  private void SmartDashboard(){
+  private void updateSmartDashboard(){
     SmartDashboard.putBoolean("Odometry Engaged", odometry_engaged);
     if (odometry_engaged){
       SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
@@ -172,4 +183,53 @@ public class Chassis extends SubsystemBase {
         (Math.abs(controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT)) > Constants.Chassis.kDeadBandRot ? controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT) : 0))
         ,this);
   }
+
+  // SYS ID -- [DELETE LATER] CODE FROM FRC DOCUMENTATION
+  private final MutVoltage m_appliedVoltage = Volts.mutable(0);
+  private final MutDistance m_distance = Meters.mutable(0);
+  private final MutLinearVelocity m_velocity = MetersPerSecond.mutable(0);
+
+  private final SysIdRoutine m_sysIdRoutine =
+    new SysIdRoutine(
+        // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
+        new SysIdRoutine.Config(),
+        new SysIdRoutine.Mechanism(
+            // Tell SysId how to plumb the driving voltage to the motors.
+            voltage -> {
+              left1.setVoltage(voltage);
+              right1.setVoltage(voltage);
+            },
+            // Tell SysId how to record a frame of data for each motor on the mechanism being
+            // characterized.
+            log -> {
+              // Record a frame for the left motors.  Since these share an encoder, we consider
+              // the entire group to be one motor.
+              log.motor("drive-left")
+                  .voltage(
+                      m_appliedVoltage.mut_replace(
+                          left1.get() * RobotController.getBatteryVoltage(), Volts))
+                  .linearPosition(m_distance.mut_replace(l_encoder.getDistance(), Meters))
+                  .linearVelocity(
+                      m_velocity.mut_replace(l_encoder.getRate(), MetersPerSecond));
+              // Record a frame for the right motors.  Since these share an encoder, we consider
+              // the entire group to be one motor.
+              log.motor("drive-right")
+                  .voltage(
+                      m_appliedVoltage.mut_replace(
+                          right1.get() * RobotController.getBatteryVoltage(), Volts))
+                  .linearPosition(m_distance.mut_replace(r_encoder.getDistance(), Meters))
+                  .linearVelocity(
+                      m_velocity.mut_replace(r_encoder.getRate(), MetersPerSecond));
+            },
+            // Tell SysId to make generated commands require this subsystem, suffix test state in
+            // WPILog with this subsystem's name ("drive")
+            this));
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return m_sysIdRoutine.quasistatic(direction);
+  }
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return m_sysIdRoutine.dynamic(direction);
+  }
+
 }
