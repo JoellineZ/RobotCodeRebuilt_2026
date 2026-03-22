@@ -43,8 +43,8 @@ public class Shooter extends SubsystemBase {
     motorConfig.idleMode(IdleMode.kCoast);
     frontConfig.idleMode(IdleMode.kCoast);
     conveyorConfig.idleMode(IdleMode.kBrake);
-    conveyorConfig.smartCurrentLimit(60, 80);
-    motorConfig.smartCurrentLimit(60, 80);
+    conveyorConfig.smartCurrentLimit(40, 40);
+    motorConfig.smartCurrentLimit(40, 40);
     motorConfig.openLoopRampRate(0.5);
     motorConfig.closedLoopRampRate(0.5);
     motorConfig.closedLoop.outputRange(-1, 1);
@@ -112,7 +112,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void setConveyor() {
-    m_conveyor.set(0.7);
+    m_conveyor.set(Constants.Shooter.SHOOTER_CONVEYOR_SPEED);
   }
   
   // ====================COMMANDS====================
@@ -129,16 +129,17 @@ public class Shooter extends SubsystemBase {
       stopShooterCommand()
     );
   }
-  public Command shooterPIDCommandMid(){
-    return Commands.run(()-> this.setShooter(2500),this);
-  }
 
   public Command shooterPIDCommandClose(){
-    return Commands.run(()-> this.setShooter(1500),this);
+    return Commands.run(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM*0.65),this);
+  }
+
+  public Command shooterPIDCommandMid(){
+    return Commands.run(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM*0.75),this);
   }
 
   public Command shooterPIDCommandFar(){
-    return Commands.run(()-> this.setShooter(3000),this);
+    return Commands.run(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM),this);
   }
 
   public Command conveyorCommand(){

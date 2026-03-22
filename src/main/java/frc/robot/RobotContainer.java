@@ -55,11 +55,11 @@ public class RobotContainer {
     conveyorTrigger.onTrue(m_shooter.conveyorCommand());
     conveyorTrigger.onFalse(m_shooter.stopShooterCommand());
 
-    shootPIDTriggerMid.onTrue(m_shooter.shooterPIDCommandMid());
-    shootPIDTriggerMid.onFalse(m_shooter.stopShooterCommand());
-
     shootPIDTriggerClose.onTrue(m_shooter.shooterPIDCommandClose());
     shootPIDTriggerClose.onFalse(m_shooter.stopShooterCommand());
+
+    shootPIDTriggerMid.onTrue(m_shooter.shooterPIDCommandMid());
+    shootPIDTriggerMid.onFalse(m_shooter.stopShooterCommand());
 
     shootPIDTriggerFar.onTrue(m_shooter.shooterPIDCommandFar());
     shootPIDTriggerFar.onFalse(m_shooter.stopShooterCommand());

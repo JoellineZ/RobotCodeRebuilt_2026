@@ -36,6 +36,7 @@ public class Intake extends SubsystemBase {
       .d(Constants.Intake.kD);
     armConfig.closedLoopRampRate(0.25);
     armConfig.openLoopRampRate(0.25);
+    wheelConfig.smartCurrentLimit(40);
 
     m_arm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     m_wheel.configure(wheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -68,7 +69,9 @@ public class Intake extends SubsystemBase {
 
   private void updateSmartDashboard(){
     SmartDashboard.putNumber("Arm Position", armEncoder.getPosition());
-    SmartDashboard.putNumber("Arm Motor Temp", m_arm.getMotorTemperature());
+    SmartDashboard.putString("Arm Motor Temp", m_arm.getMotorTemperature()+"°C");
+    SmartDashboard.putString("Roller Temp", m_wheel.getMotorTemperature()+"°C");
+    SmartDashboard.putString("Roller Current", m_wheel.getOutputCurrent()+"A");
   }
 
   @Override

@@ -8,7 +8,7 @@ import frc.robot.Constants;
 
 public class climber extends SubsystemBase {
 
-    private final SparkMax m_climberDown = new SparkMax(Constants.Intake.ID_EXTDENDER, MotorType.kBrushless);
-    private final SparkMax m_climberUp = new SparkMax(Constants.Intake.ID_INTAKE_WHEEL, MotorType.kBrushless);   
+    // private final SparkMax m_climberDown = new SparkMax(Constants.Intake.ID_EXTDENDER, MotorType.kBrushless);
+    // private final SparkMax m_climberUp = new SparkMax(Constants.Intake.ID_INTAKE_WHEEL, MotorType.kBrushless);   
     
 }
