@@ -33,18 +33,19 @@ public class Intake extends SubsystemBase {
     rWheelConfig.idleMode(IdleMode.kBrake);
     
     armConfig.inverted(true);
-    lwheelConfig.inverted(false);
-    rWheelConfig.inverted(true);
     armConfig.closedLoop
       .p(Constants.Intake.kP) // Los valores de PID son "Calibraciones" experimentales prueba y error. Recomendacion: Empieza con un valor que te de la funcion MAX_ERROR*kP = 1
       .i(Constants.Intake.kI)
       .d(Constants.Intake.kD);
-    armConfig.closedLoopRampRate(0.25);
-    armConfig.openLoopRampRate(0.25);
-    lwheelConfig.smartCurrentLimit(40);
-    rWheelConfig.smartCurrentLimit(40);
     armConfig.closedLoop.positionWrappingInputRange(-1, 13.4);
     armConfig.closedLoop.positionWrappingEnabled(true);
+    armConfig.closedLoopRampRate(0.25);
+    armConfig.openLoopRampRate(0.25);
+
+    lwheelConfig.inverted(false);
+    rWheelConfig.inverted(true);
+    lwheelConfig.smartCurrentLimit(40);
+    rWheelConfig.smartCurrentLimit(40);
 
     m_arm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     m_leftWheel.configure(lwheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -83,9 +84,9 @@ public class Intake extends SubsystemBase {
   }
   private void updateSmartDashboard(){
     SmartDashboard.putNumber("Arm Position", armEncoder.getPosition());
-    SmartDashboard.putString("Arm Motor Temp", m_arm.getMotorTemperature()+"°C");
-    SmartDashboard.putString("Roller left Temp", m_leftWheel.getMotorTemperature()+"°C");
-    SmartDashboard.putString("Roller right Temp", m_rightWheel.getMotorTemperature()+"°C");
+    SmartDashboard.putString("Arm Motor Temp", m_arm.getMotorTemperature()+"oC");
+    SmartDashboard.putString("Roller left Temp", m_leftWheel.getMotorTemperature()+"oC");
+    SmartDashboard.putString("Roller right Temp", m_rightWheel.getMotorTemperature()+"oC");
     SmartDashboard.putString("Roller left Current", m_leftWheel.getOutputCurrent()+"A");
     SmartDashboard.putString("Roller right Current", m_rightWheel.getOutputCurrent()+"A");
     SmartDashboard.putNumber("Arm Setpoint Error", Math.abs(armController.getSetpoint()-armEncoder.getPosition()));
@@ -104,13 +105,11 @@ public class Intake extends SubsystemBase {
         -controller.getRawAxis(Constants.IO.ID_JOYSTICK_BRAKE))
         ,this);
   }
-  
   public Command rollWheelCommand(){
-    return Commands.runOnce(()->this.rollWheel(1), this);
+    return Commands.run(()->this.rollWheel(1), this);
   }
-  
   public Command rollBackWheelCommand(){
-    return Commands.runOnce(()->this.rollWheel(-1), this);
+    return Commands.run(()->this.rollWheel(-1), this);
   }
   public Command stopWheelCommand(){
     return Commands.runOnce(this::stopWheel, this);

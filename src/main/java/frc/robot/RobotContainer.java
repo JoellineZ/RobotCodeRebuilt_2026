@@ -76,8 +76,8 @@ public class RobotContainer {
     extendIntakeTrigger.onTrue(m_intake.extendCommand());
     retractIntakeTrigger.onTrue(m_intake.retractCommand());
 
-    climberDownTrigger.whileTrue(m_climber.dumbReverseClimber());
-    climberUpTrigger.whileTrue(m_climber.dumbClimber());
+    climberDownTrigger.whileTrue(m_climber.dumbReverseClimberCommand());
+    climberUpTrigger.whileTrue(m_climber.dumbClimberCommand());
   
     Command resetArmEncoderCommand = m_intake.resetEncoderCommand();
     SmartDashboard.putData("Reset Arm Encoder", resetArmEncoderCommand);
@@ -87,7 +87,7 @@ public class RobotContainer {
     m_chassis.setDefaultCommand(
         m_chassis.driveCommand(drive_controller, m_chassis)
     );
-    m_climber.setDefaultCommand(m_climber.stopCommandClimber());
+    m_climber.setDefaultCommand(m_climber.stopCommandClimberCommand());
     m_intake.setDefaultCommand(m_intake.driveCommand(mech_controller));
   }
 

@@ -54,17 +54,13 @@ public class Chassis extends SubsystemBase {
     Constants.Chassis.kA
   );
   private final DifferentialDriveKinematics m_kinematics = new DifferentialDriveKinematics(Constants.Chassis.kTrackWidth);
-  // private final DifferentialDrive m_drive = new DifferentialDrive(left1::set, right1::set);
   private Encoder l_encoder;
   private Encoder r_encoder;
   private AHRS gyro = new AHRS(NavXComType.kMXP_SPI);
-
-  private boolean odometry_engaged;
   
   // Pathplanner
+  private boolean odometry_engaged;
   private DifferentialDriveOdometry m_odometry;
-  
-  public double rot_monitor;
 
   public Chassis() {
     left2.follow(left1);
@@ -130,6 +126,8 @@ public class Chassis extends SubsystemBase {
   public void updateOdometry(){
     m_odometry.update(Rotation2d.fromDegrees(gyro.getYaw()), l_encoder.getDistance(),r_encoder.getDistance());
   }
+
+  // ==========================METHODS=========================
   @Override
   public void periodic() {
     updateSmartDashboard();
@@ -138,25 +136,6 @@ public class Chassis extends SubsystemBase {
         l_encoder.getDistance(),
         r_encoder.getDistance()
     );
-  }
-
-  public void resetdometry(Pose2d pose) {
-    l_encoder.reset();
-    r_encoder.reset();
-    m_odometry.resetPosition(
-        Rotation2d.fromDegrees(gyro.getYaw()),
-        l_encoder.getDistance(),
-        r_encoder.getDistance(),
-        pose
-    );
-  }
-
-  public ChassisSpeeds getRobotRelativeSpeeds(){
-    return m_kinematics.toChassisSpeeds(
-      new DifferentialDriveWheelSpeeds(
-        l_encoder.getRate(),
-        r_encoder.getRate())
-      );
   }
 
   public void drive(ChassisSpeeds chassisSpeeds){
@@ -222,7 +201,24 @@ public class Chassis extends SubsystemBase {
       pose
     );
   }
+  public void resetOdometry(Pose2d pose) {
+    l_encoder.reset();
+    r_encoder.reset();
+    m_odometry.resetPosition(
+        Rotation2d.fromDegrees(gyro.getYaw()),
+        l_encoder.getDistance(),
+        r_encoder.getDistance(),
+        pose
+    );
+  }
 
+  public ChassisSpeeds getRobotRelativeSpeeds(){
+    return m_kinematics.toChassisSpeeds(
+      new DifferentialDriveWheelSpeeds(
+        l_encoder.getRate(),
+        r_encoder.getRate())
+      );
+  }
 
   // ============================COMMANDS============================
   public Command clearFaultsCommand(){
@@ -236,8 +232,9 @@ public class Chassis extends SubsystemBase {
       () -> 
         this.arcadeDrive(
           (controller.getRawAxis(Constants.IO.ID_JOYSTICK_SPEED)- controller.getRawAxis(Constants.IO.ID_JOYSTICK_BRAKE)),
-        (Math.abs(controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT)) > Constants.Chassis.kDeadBandRot ? controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT) : 0))
-        ,this);
+          (Math.abs(controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT)) > Constants.Chassis.kDeadBandRot ? controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT) : 0))
+          ,this
+        );
   }
 
   // SYS ID -- [DELETE LATER] CODE FROM FRC DOCUMENTATION
@@ -287,5 +284,4 @@ public class Chassis extends SubsystemBase {
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return m_sysIdRoutine.dynamic(direction);
   }
-
 }

@@ -76,6 +76,7 @@ public class Constants {
     public static final double kI = 0;
     public static final double kD = 0.001;
     public static final double MAX_CLIMBER_SPEED = 0.5;
+    public static final int CLIMBER_SPEED = 1;
   
     
   }
