@@ -36,17 +36,19 @@ public class Constants {
     public static final int ID_EXTDENDER = 8;
     public static final double LIMIT_BWD = 0;
     public static final double LIMIT_FWD = 20;
-    public static final int ID_INTAKE_WHEEL = 9;
+    public static final int ID_INTAKE_RFWHEEL = 9;
+    public static final int ID_INTAKE_LFWHEEL = 10;
     public static final double MAX_ARM_SPEED_PERCENT = 0.3;
-    public static final double INTAKE_ROLL_SPEED = 0.575;
+    public static final double INTAKE_ROLL_SPEED = 0.9;
     public static final double kP = 0.1; // 
-    public static final double kI = 0;
+    public static final double kI = 0.001;
     public static final double kD = 0.01;
     public static final double MIN_ARM_POSITION = 0;
     public static final double MAX_ARM_POSITION = 12.4;
-    public static final double MAX_ERROR =0.25; //Rotations
+    public static final double MAX_ERROR =0.5; //Rotations
     public static final double EXTENDED_POSITION = 12.4;
     public static final double RETRACTED_POSITION = 0;
+    public static final int ID_CLIMBER_DOWN = 0;
   }
 
   public class Shooter{        
@@ -67,9 +69,19 @@ public class Constants {
     public static final double kI_b = 0;
     public static final double kD_b = kD_f;
   }
+  public class Climber {
+    public static final int ID_CLIMBER_UP = 12;
+    public static final int ID_CLIMBER_DOWN = 11;
+    public static final double kP = 0.001; // 
+    public static final double kI = 0;
+    public static final double kD = 0.001;
+    public static final double MAX_CLIMBER_SPEED = 0.5;
+  
+    
+  }
 
   public class IO{
-    public static final int ID_CONTROLLER = 0;
+    // public static final int ID_CONTROLLER = 0;
     public static final int ID_DRIVER_CHASSIS = 1;
     public static final int ID_DRIVER_MECH = 0;    
     public static final int ID_JOYSTICK_SPEED = XboxController.Axis.kLeftTrigger.value;

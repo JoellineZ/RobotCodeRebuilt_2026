@@ -33,6 +33,9 @@ public class RobotContainer {
   public Trigger shootPIDTriggerFar = new JoystickButton(mech_controller, XboxController.Button.kB.value);
   public Trigger extendIntakeTrigger = new Trigger(()->mech_controller.getLeftY()<-0.6);
   public Trigger retractIntakeTrigger = new Trigger(()->mech_controller.getLeftY()>0.6);
+  public Trigger climberUpTrigger = new Trigger(()->drive_controller.getRightY()>0.6);
+  public Trigger climberDownTrigger = new Trigger(()->drive_controller.getRightY()<-0.6);
+
 
   public RobotContainer() {
     boolean isCompetition = DriverStation.isFMSAttached();
@@ -71,8 +74,10 @@ public class RobotContainer {
     wheelBackTrigger.onFalse(m_intake.stopWheelCommand());
 
     extendIntakeTrigger.onTrue(m_intake.extendCommand());
-
     retractIntakeTrigger.onTrue(m_intake.retractCommand());
+
+    climberDownTrigger.whileTrue(m_climber.dumbReverseClimber());
+    climberUpTrigger.whileTrue(m_climber.dumbClimber());
   
     Command resetArmEncoderCommand = m_intake.resetEncoderCommand();
     SmartDashboard.putData("Reset Arm Encoder", resetArmEncoderCommand);
@@ -82,9 +87,8 @@ public class RobotContainer {
     m_chassis.setDefaultCommand(
         m_chassis.driveCommand(drive_controller, m_chassis)
     );
-    m_intake.setDefaultCommand(
-      m_intake.driveCommand(mech_controller, m_intake)
-    );
+    m_climber.setDefaultCommand(m_climber.stopCommandClimber());
+    m_intake.setDefaultCommand(m_intake.driveCommand(mech_controller));
   }
 
   public Command getAutonomousCommand() {

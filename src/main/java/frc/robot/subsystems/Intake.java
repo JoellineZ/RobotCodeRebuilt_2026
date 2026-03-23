@@ -19,36 +19,42 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public class Intake extends SubsystemBase {
   private final SparkMax m_arm = new SparkMax(Constants.Intake.ID_EXTDENDER, MotorType.kBrushless);
-  private final SparkMax m_wheel = new SparkMax(Constants.Intake.ID_INTAKE_WHEEL, MotorType.kBrushless);   
+  private final SparkMax m_leftWheel = new SparkMax(Constants.Intake.ID_INTAKE_LFWHEEL, MotorType.kBrushed);
+  private final SparkMax m_rightWheel = new SparkMax(Constants.Intake.ID_INTAKE_RFWHEEL, MotorType.kBrushed);   
   private SparkMaxConfig armConfig = new SparkMaxConfig();
-  private SparkMaxConfig wheelConfig = new SparkMaxConfig();
+  private SparkMaxConfig lwheelConfig = new SparkMaxConfig();
+  private SparkMaxConfig rWheelConfig = new SparkMaxConfig();
   private SparkClosedLoopController armController = m_arm.getClosedLoopController();
   private final RelativeEncoder armEncoder= m_arm.getEncoder();
     
   public Intake() {
     armConfig.idleMode(IdleMode.kBrake);
-    wheelConfig.idleMode(IdleMode.kBrake);
+    lwheelConfig.idleMode(IdleMode.kBrake);
+    rWheelConfig.idleMode(IdleMode.kBrake);
+    
     armConfig.inverted(true);
-    wheelConfig.inverted(false);
+    lwheelConfig.inverted(false);
+    rWheelConfig.inverted(true);
     armConfig.closedLoop
       .p(Constants.Intake.kP) // Los valores de PID son "Calibraciones" experimentales prueba y error. Recomendacion: Empieza con un valor que te de la funcion MAX_ERROR*kP = 1
       .i(Constants.Intake.kI)
       .d(Constants.Intake.kD);
     armConfig.closedLoopRampRate(0.25);
     armConfig.openLoopRampRate(0.25);
-    wheelConfig.smartCurrentLimit(40);
+    lwheelConfig.smartCurrentLimit(40);
+    rWheelConfig.smartCurrentLimit(40);
+    armConfig.closedLoop.positionWrappingInputRange(-1, 13.4);
+    armConfig.closedLoop.positionWrappingEnabled(true);
 
     m_arm.configure(armConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_wheel.configure(wheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_leftWheel.configure(lwheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_rightWheel.configure(rWheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   private void drive(double drive_speed){
-      if(Math.abs(drive_speed) > 1 ){
-        drive_speed = drive_speed > 0 ? 1 : -1;
-      }
+      drive_speed = MathUtil.clamp(drive_speed, -1, 1);
       double motor_speed = drive_speed * Constants.Intake.MAX_ARM_SPEED_PERCENT;
       motor_speed =  stopAtLimit(motor_speed);
-
       m_arm.set(motor_speed);
   }
 
@@ -58,41 +64,45 @@ public class Intake extends SubsystemBase {
   }
 
   private void rollWheel(int direction) {
-    m_wheel.set(armEncoder.getPosition()<5 ? 0 : direction * Constants.Intake.INTAKE_ROLL_SPEED);
+    m_leftWheel.set(armEncoder.getPosition()<5 ? 0 : direction * Constants.Intake.INTAKE_ROLL_SPEED);
+    m_rightWheel.set(armEncoder.getPosition()<5 ? 0 : direction * Constants.Intake.INTAKE_ROLL_SPEED);
   }
   private void stopWheel() {
-    m_wheel.stopMotor();
+    m_rightWheel.stopMotor();
+    m_leftWheel.stopMotor();
   } 
   private void resetEncoders(){
     armEncoder.setPosition(0);
   }
-
+  private double stopAtLimit(double input){
+      double output = input;
+      if ((this.armEncoder.getPosition() <= Constants.Intake.MIN_ARM_POSITION && input < 0) || (this.armEncoder.getPosition()>= Constants.Intake.MAX_ARM_POSITION && input>0)){
+          output = 0;
+      }
+      return output;
+  }
   private void updateSmartDashboard(){
     SmartDashboard.putNumber("Arm Position", armEncoder.getPosition());
     SmartDashboard.putString("Arm Motor Temp", m_arm.getMotorTemperature()+"°C");
-    SmartDashboard.putString("Roller Temp", m_wheel.getMotorTemperature()+"°C");
-    SmartDashboard.putString("Roller Current", m_wheel.getOutputCurrent()+"A");
-  }
+    SmartDashboard.putString("Roller left Temp", m_leftWheel.getMotorTemperature()+"°C");
+    SmartDashboard.putString("Roller right Temp", m_rightWheel.getMotorTemperature()+"°C");
+    SmartDashboard.putString("Roller left Current", m_leftWheel.getOutputCurrent()+"A");
+    SmartDashboard.putString("Roller right Current", m_rightWheel.getOutputCurrent()+"A");
+    SmartDashboard.putNumber("Arm Setpoint Error", Math.abs(armController.getSetpoint()-armEncoder.getPosition()));
 
+  }
   @Override
   public void periodic() {
     updateSmartDashboard();
   }
 
   // ====================COMMANDS====================
-  public Command driveCommand (XboxController controller, Intake m_intake){
+  public Command driveCommand (XboxController controller){
     return Commands.run(
       ()->this.drive(
         controller.getRawAxis(Constants.IO.ID_JOYSTICK_SPEED)
         -controller.getRawAxis(Constants.IO.ID_JOYSTICK_BRAKE))
         ,this);
-  }
-  private double stopAtLimit(double input){
-    double output = input;
-    if (this.armEncoder.getPosition() <= 0 && input < 0){
-        output = 0;
-    }
-    return output;
   }
   
   public Command rollWheelCommand(){
