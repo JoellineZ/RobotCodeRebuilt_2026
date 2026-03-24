@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
@@ -45,6 +46,8 @@ public class RobotContainer {
         : stream
     );
     SmartDashboard.putData("Auto Chooser", autoChooser);
+    NamedCommands.registerCommand("shootFar", m_shooter.shooterPIDCommandFar());
+    NamedCommands.registerCommand("stopShooter", m_shooter.stopShooterCommand());
     configureBindings();
     defaultCommands();
   }
@@ -73,8 +76,8 @@ public class RobotContainer {
     wheelBackTrigger.onTrue(m_intake.rollBackWheelCommand());
     wheelBackTrigger.onFalse(m_intake.stopWheelCommand());
 
-    extendIntakeTrigger.onTrue(m_intake.extendCommand());
-    retractIntakeTrigger.onTrue(m_intake.retractCommand());
+    extendIntakeTrigger.whileTrue(m_intake.extendCommand());
+    retractIntakeTrigger.whileTrue(m_intake.retractCommand());
 
     climberDownTrigger.whileTrue(m_climber.dumbReverseClimberCommand());
     climberUpTrigger.whileTrue(m_climber.dumbClimberCommand());

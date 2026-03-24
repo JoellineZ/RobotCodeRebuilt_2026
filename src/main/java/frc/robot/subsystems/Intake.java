@@ -38,7 +38,7 @@ public class Intake extends SubsystemBase {
       .i(Constants.Intake.kI)
       .d(Constants.Intake.kD);
     armConfig.closedLoop.positionWrappingInputRange(-1, 13.4);
-    armConfig.closedLoop.positionWrappingEnabled(true);
+    armConfig.closedLoop.positionWrappingEnabled(false);
     armConfig.closedLoopRampRate(0.25);
     armConfig.openLoopRampRate(0.25);
 
@@ -95,6 +95,9 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     updateSmartDashboard();
+    if ((this.armEncoder.getPosition() <= Constants.Intake.MIN_ARM_POSITION && m_arm.getAppliedOutput() < 0) || (this.armEncoder.getPosition()>= Constants.Intake.MAX_ARM_POSITION && m_arm.getAppliedOutput() > 0)){
+      m_arm.stopMotor();
+    }
   }
 
   // ====================COMMANDS====================
@@ -118,9 +121,9 @@ public class Intake extends SubsystemBase {
     return Commands.runOnce(this::resetEncoders, this);
   } 
   public Command extendCommand(){
-    return Commands.run(()->this.setArmPosition(Constants.Intake.EXTENDED_POSITION), this).until(()->Math.abs(armEncoder.getPosition()-Constants.Intake.EXTENDED_POSITION)<Constants.Intake.MAX_ERROR);
+    return Commands.run(()->this.setArmPosition(Constants.Intake.EXTENDED_POSITION), this);//.until(()->Math.abs(armEncoder.getPosition()-Constants.Intake.EXTENDED_POSITION)<Constants.Intake.MAX_ERROR);
   }
   public Command retractCommand(){
-    return Commands.run(()->this.setArmPosition(Constants.Intake.RETRACTED_POSITION),this).until(()->Math.abs(armEncoder.getPosition()-Constants.Intake.RETRACTED_POSITION)<Constants.Intake.MAX_ERROR);
+    return Commands.run(()->this.setArmPosition(Constants.Intake.RETRACTED_POSITION),this);//.until(()->Math.abs(armEncoder.getPosition()-Constants.Intake.RETRACTED_POSITION)<Constants.Intake.MAX_ERROR);
   }
 }
