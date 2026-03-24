@@ -84,10 +84,16 @@ public class Shooter extends SubsystemBase {
     updateSmartDashboard();
   }
 
-  public void stopMotors(){
+  public void stopShooter(){
     m_back.stopMotor();
     m_front.stopMotor();
+  }
+  public void stopConveyor(){
     m_conveyor.stopMotor();
+  }
+  public void stopMotors(){
+    stopShooter();
+    stopConveyor();
   }
   public void setShooter(double speed){
     speed = MathUtil.clamp(speed, 0, Constants.Shooter.MAX_RPM);
@@ -117,7 +123,10 @@ public class Shooter extends SubsystemBase {
   
   // ====================COMMANDS====================
   public Command stopShooterCommand(){
-    return Commands.runOnce(this::stopMotors, this);
+    return Commands.runOnce(this::stopShooter, this);
+  }
+  public Command stopConveyorCommand(){
+    return Commands.runOnce(this::stopConveyor, this);
   }
   public Command driveShooterCommand(double speed){
     return Commands.run(()-> this.setShooter(speed),this);

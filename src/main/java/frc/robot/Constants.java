@@ -85,6 +85,7 @@ public class Constants {
     // public static final int ID_CONTROLLER = 0;
     public static final int ID_DRIVER_CHASSIS = 1;
     public static final int ID_DRIVER_MECH = 0;    
+    public static final int ID_TEST_CONTROLLER = 2;
     public static final int ID_JOYSTICK_SPEED = XboxController.Axis.kLeftTrigger.value;
     public static final int ID_JOYSTICK_ROT = 0;
     public static final int ID_JOYSTICK_BRAKE = XboxController.Axis.kRightTrigger.value;
