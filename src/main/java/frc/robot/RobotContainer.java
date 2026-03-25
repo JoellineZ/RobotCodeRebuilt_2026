@@ -1,6 +1,5 @@
 package frc.robot;
 
-import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -44,8 +43,8 @@ public class RobotContainer {
     // Test Triggers
     public Trigger testTriggerQuasistatic = new JoystickButton(test_controller, XboxController.Button.kY.value);
     public Trigger testTriggerQuasistaticReverse = new JoystickButton(test_controller, XboxController.Button.kX.value);
-  public Trigger testTriggerDynamic = new JoystickButton(test_controller, XboxController.Button.kA.value);
-  public Trigger testTriggerDynamicReverse = new JoystickButton(test_controller, XboxController.Button.kB.value);
+    public Trigger testTriggerDynamic = new JoystickButton(test_controller, XboxController.Button.kA.value);
+    public Trigger testTriggerDynamicReverse = new JoystickButton(test_controller, XboxController.Button.kB.value);
 
   public RobotContainer() {
     boolean isCompetition = DriverStation.isFMSAttached();
@@ -72,6 +71,8 @@ public class RobotContainer {
     conveyorTrigger.onTrue(m_shooter.conveyorCommand());
     conveyorTrigger.onFalse(m_shooter.stopConveyorCommand());
 
+    /*Shooter */
+    
     shootPIDTriggerClose.onTrue(m_shooter.shooterPIDCommandClose());
     shootPIDTriggerClose.onFalse(m_shooter.stopShooterCommand());
 
@@ -80,6 +81,9 @@ public class RobotContainer {
 
     shootPIDTriggerFar.onTrue(m_shooter.shooterPIDCommandFar());
     shootPIDTriggerFar.onFalse(m_shooter.stopShooterCommand());
+
+
+    /* Intake */
 
     wheelTrigger.onTrue(m_intake.rollWheelCommand());
     wheelTrigger.onFalse(m_intake.stopWheelCommand());

@@ -23,70 +23,74 @@ import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase {
     
-  private final SparkMax m_back = new SparkMax(Constants.Shooter.ID_SHOOTER_BACK, MotorType.kBrushless); //Neo
-  private final SparkMax m_front = new SparkMax(Constants.Shooter.ID_SHOOTER_FRONT, MotorType.kBrushless); //Neo
+  private final SparkMax m_slave = new SparkMax(Constants.Shooter.ID_SHOOTER_BACK, MotorType.kBrushless); //Neo
+  private final SparkMax m_master = new SparkMax(Constants.Shooter.ID_SHOOTER_FRONT, MotorType.kBrushless); //Neo
   private final SparkMax m_conveyor = new SparkMax(Constants.Shooter.ID_SHOOTER_CONVEYOR, MotorType.kBrushed); //Mini CIM
-  private SparkMaxConfig motorConfig = new SparkMaxConfig();
-  private SparkMaxConfig frontConfig = new SparkMaxConfig();
+  private SparkMaxConfig slaveConfig = new SparkMaxConfig();
+  private SparkMaxConfig masterConfig = new SparkMaxConfig();
   private SparkMaxConfig conveyorConfig = new SparkMaxConfig();
-  public SparkMaxConfig reConfig = new SparkMaxConfig();
-  private RelativeEncoder backEncoder = m_back.getEncoder();
-  private RelativeEncoder frontEncoder = m_front.getEncoder();
-  private SparkClosedLoopController backController = m_back.getClosedLoopController();
-  private SparkClosedLoopController frontController = m_front.getClosedLoopController();
+  private RelativeEncoder masterEncoder = m_master.getEncoder();
+  private SparkClosedLoopController masterController = m_master.getClosedLoopController();
   private FeedForwardConfig feedForwardConfig = new FeedForwardConfig();
-  public double frontTemp;
-  public double backTemp;
+  private double masterTemp;
+  private double slaveTemp;
+  private int ready = 0;
 
   @SuppressWarnings("removal") // Reset y Safe Parameters de SparkConfig
   public Shooter() {
-    motorConfig.idleMode(IdleMode.kCoast);
-    frontConfig.idleMode(IdleMode.kCoast);
+    // Idle Modes
+    slaveConfig.idleMode(IdleMode.kCoast);
+    masterConfig.idleMode(IdleMode.kCoast);
     conveyorConfig.idleMode(IdleMode.kBrake);
-    conveyorConfig.smartCurrentLimit(40, 40);
-    motorConfig.smartCurrentLimit(40, 40);
-    motorConfig.openLoopRampRate(0.5);
-    motorConfig.closedLoopRampRate(0.5);
-    motorConfig.closedLoop.outputRange(-1, 1);
-    motorConfig.voltageCompensation(12);
+
+    // Current Limits
+    conveyorConfig.smartCurrentLimit(Constants.Robot.DEFAULT_CURRENT, Constants.Robot.DEFAULT_CURRENT);
+    masterConfig.smartCurrentLimit(Constants.Shooter.STALL_LIMIT, Constants.Shooter.FREE_LIMIT);
+    slaveConfig.smartCurrentLimit(Constants.Shooter.STALL_LIMIT, Constants.Shooter.FREE_LIMIT);
+
+    masterConfig.openLoopRampRate(0.5);
+    masterConfig.closedLoopRampRate(0.5);
+    slaveConfig.openLoopRampRate(0.5);
+    slaveConfig.closedLoopRampRate(0.5);
+
+    // Output Defaults
+    slaveConfig.closedLoop.outputRange(-1, 1); //Defaults
+    masterConfig.closedLoop.outputRange(-1, 1);
+    slaveConfig.voltageCompensation(12);
+    masterConfig.voltageCompensation(12);
+
+    // FF Config
     feedForwardConfig.kV(Constants.Shooter.kV);
-    motorConfig.closedLoop.feedForward.apply(feedForwardConfig);
+    masterConfig.closedLoop.feedForward.apply(feedForwardConfig);
     
-    frontConfig.smartCurrentLimit(60, 80);
-    frontConfig.openLoopRampRate(0.5);
-    frontConfig.closedLoopRampRate(0.5);
-    frontConfig.closedLoop.outputRange(-1, 1);
-    frontConfig.voltageCompensation(12);
-    frontConfig.closedLoop.feedForward.apply(feedForwardConfig);
-    
-    motorConfig.closedLoop
-      .p(Constants.Shooter.kP_b)
-      .i(Constants.Shooter.kI_b)
-      .d(Constants.Shooter.kD_b);
-    
-    frontConfig.closedLoop
-      .p(Constants.Shooter.kP_f)
-      .i(Constants.Shooter.kI_f)
-      .d(Constants.Shooter.kD_f);
+    // PID Config  
+    masterConfig.closedLoop
+      .p(Constants.Shooter.kP)
+      .i(Constants.Shooter.kI)
+      .d(Constants.Shooter.kD);
     
     conveyorConfig.inverted(true);
-    frontConfig.inverted(true);
+    masterConfig.inverted(true);
+    slaveConfig.inverted(false);
+
+    // Master-Slave
+    slaveConfig.follow(m_master, true);
+
     // Aplicar Configuraciones
-    m_back.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_front.configure(frontConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_slave.configure(slaveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_master.configure(masterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     m_conveyor.configure(conveyorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
   public void periodic() {
-    frontTemp = m_front.getMotorTemperature();
-    backTemp = m_back.getMotorTemperature();
+    masterTemp = m_master.getMotorTemperature();
+    slaveTemp = m_slave.getMotorTemperature();
     updateSmartDashboard();
   }
 
   public void stopShooter(){
-    m_back.stopMotor();
-    m_front.stopMotor();
+    m_master.stopMotor();
   }
   public void stopConveyor(){
     m_conveyor.stopMotor();
@@ -97,28 +101,23 @@ public class Shooter extends SubsystemBase {
   }
   public void setShooter(double speed){
     speed = MathUtil.clamp(speed, 0, Constants.Shooter.MAX_RPM);
-    double frontSpeed = speed;
-    double backSpeed = speed;
-    backController.setSetpoint(backSpeed, ControlType.kVelocity);
-    frontController.setSetpoint(frontSpeed, ControlType.kVelocity);
-    // TroubleShooting
-    SmartDashboard.putNumber("Back Target", backSpeed);
-    SmartDashboard.putNumber("Front Target", frontSpeed);
+    masterController.setSetpoint(speed, ControlType.kVelocity);
   }
 
   public void updateSmartDashboard(){
     SmartDashboard.putNumber("Conveyor Output", m_conveyor.getAppliedOutput());
-    SmartDashboard.putNumber("Back Output", m_back.getAppliedOutput());
-    SmartDashboard.putNumber("Front Output", m_front.getAppliedOutput());
-    SmartDashboard.putNumber("Shooter Front Temp", frontTemp);
-    SmartDashboard.putNumber("Shooter Back Temp", backTemp);
-    SmartDashboard.putBoolean("Shooter Overheating", frontTemp > Constants.Shooter.OVERHEAT_TEMP || backTemp > Constants.Shooter.OVERHEAT_TEMP);
-    SmartDashboard.putNumber("FrontSpeed", frontEncoder.getVelocity());
-    SmartDashboard.putNumber("BackSpeed", backEncoder.getVelocity());
+    SmartDashboard.putNumber("Back Output", m_slave.getAppliedOutput());
+    SmartDashboard.putNumber("Front Output", m_master.getAppliedOutput());
+    SmartDashboard.putNumber("Shooter Master Temp", masterTemp);
+    SmartDashboard.putNumber("Shooter Slave Temp", slaveTemp);
+    SmartDashboard.putBoolean("Shooter Overheating", masterTemp > Constants.Shooter.OVERHEAT_TEMP || slaveTemp > Constants.Shooter.OVERHEAT_TEMP);
+    SmartDashboard.putNumber("Speed", masterEncoder.getVelocity());
+    SmartDashboard.putNumber("ClosedLoopError", Math.abs(masterEncoder.getVelocity()-masterController.getSetpoint()));
   }
 
   public void setConveyor() {
-    m_conveyor.set(Constants.Shooter.SHOOTER_CONVEYOR_SPEED);
+    ready = Math.abs(masterController.getSetpoint()-masterEncoder.getVelocity())<5?1 : 0;
+    m_conveyor.set(Constants.Shooter.SHOOTER_CONVEYOR_SPEED*ready);
   }
   
   // ====================COMMANDS====================
@@ -148,10 +147,16 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command shooterPIDCommandFar(){
-    return Commands.run(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM),this);
+    return Commands.runOnce(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM),this);
   }
 
   public Command conveyorCommand(){
     return Commands.run(this::setConveyor, this);
+  }
+  public SequentialCommandGroup shootSequence(){
+    return new SequentialCommandGroup(
+      shooterPIDCommandFar(),
+      conveyorCommand()
+    );
   }
 }

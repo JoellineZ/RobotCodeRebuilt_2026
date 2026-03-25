@@ -58,16 +58,15 @@ public class Constants {
     public static final double SHOOTER_CONVEYOR_SPEED = 0.65;
     public static final double OVERHEAT_TEMP = 60.0;
     public static final double K_BACKSPIN = 0.6;
-    public static final double NEO_SAFE_RPM = 5000.0;
+    public static final double NEO_SAFE_RPM = 2500.0;//5000
     public static final double MAX_RPM = NEO_SAFE_RPM;
     public static final double MAX_RPM_FRONT = NEO_SAFE_RPM;
-    public static final double kP_f = 0.00025;
-    public static final double kI_f = 0;
-    public static final double kD_f = 0.002;
+    public static final double kP = 0.00025;
+    public static final double kI = 0;
+    public static final double kD = 0.002;
     public static final double kV = 0.45/NEO_SAFE_RPM;
-    public static final double kP_b = kP_f;
-    public static final double kI_b = 0;
-    public static final double kD_b = kD_f;
+    public static final int STALL_LIMIT = 60;
+    public static final int FREE_LIMIT = 40;
   }
   public class Climber {
     public static final int ID_CLIMBER_UP = 12;
@@ -77,8 +76,6 @@ public class Constants {
     public static final double kD = 0.001;
     public static final double MAX_CLIMBER_SPEED = 0.5;
     public static final int CLIMBER_SPEED = 1;
-  
-    
   }
 
   public class IO{
@@ -89,5 +86,9 @@ public class Constants {
     public static final int ID_JOYSTICK_SPEED = XboxController.Axis.kLeftTrigger.value;
     public static final int ID_JOYSTICK_ROT = 0;
     public static final int ID_JOYSTICK_BRAKE = XboxController.Axis.kRightTrigger.value;
-}
+  }
+
+  public class Robot {
+    public static final int DEFAULT_CURRENT = 40;
+  }
 }

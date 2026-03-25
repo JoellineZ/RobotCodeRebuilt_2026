@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -61,6 +62,7 @@ public class Chassis extends SubsystemBase {
   // Pathplanner
   private boolean odometry_engaged;
   private DifferentialDriveOdometry m_odometry;
+  public Field2d field = new Field2d();
 
   public Chassis() {
     left2.follow(left1);
@@ -130,12 +132,8 @@ public class Chassis extends SubsystemBase {
   // ==========================METHODS=========================
   @Override
   public void periodic() {
+    updateOdometry();
     updateSmartDashboard();
-    m_odometry.update(
-        Rotation2d.fromDegrees(gyro.getYaw()),
-        l_encoder.getDistance(),
-        r_encoder.getDistance()
-    );
   }
 
   public void drive(ChassisSpeeds chassisSpeeds){
@@ -170,12 +168,14 @@ public class Chassis extends SubsystemBase {
 
   private void updateSmartDashboard(){
     SmartDashboard.putBoolean("Odometry Engaged", odometry_engaged);
+    SmartDashboard.putNumber("Pose", gyro.getYaw());
     if (odometry_engaged){
       SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
       SmartDashboard.putNumber("Gyro Pitch", gyro.getPitch());
       SmartDashboard.putNumber("Gyro Roll", gyro.getRoll());
       SmartDashboard.putNumber("Left Encoder Ticks", l_encoder.get());
       SmartDashboard.putNumber("Right Encoder Ticks", r_encoder.get());
+      SmartDashboard.putData("Field",field);
     }
   }
 
