@@ -60,7 +60,7 @@ public class Chassis extends SubsystemBase {
   private AHRS gyro = new AHRS(NavXComType.kMXP_SPI);
   
   // Pathplanner
-  private boolean odometry_engaged;
+  private boolean odometry_engaged=true;
   private DifferentialDriveOdometry m_odometry;
   public Field2d field = new Field2d();
 
@@ -82,6 +82,8 @@ public class Chassis extends SubsystemBase {
     
     l_encoder.reset();
     r_encoder.reset();
+    l_encoder.setReverseDirection(true); // Inversion fisica de los encoders
+    r_encoder.setReverseDirection(false);
     gyro.zeroYaw();
     gyro.reset();
 
@@ -238,10 +240,14 @@ public class Chassis extends SubsystemBase {
   }
 
   // SYS ID -- [DELETE LATER] CODE FROM FRC DOCUMENTATION
-  private final MutVoltage m_appliedVoltage = Volts.mutable(0);
-  private final MutDistance m_distance = Meters.mutable(0);
-  private final MutLinearVelocity m_velocity = MetersPerSecond.mutable(0);
-
+  // Left
+  private final MutVoltage m_leftVoltage = Volts.mutable(0);
+  private final MutDistance m_leftDistance = Meters.mutable(0);
+  private final MutLinearVelocity m_leftVelocity = MetersPerSecond.mutable(0);
+  // Right
+  private final MutVoltage m_rightVoltage = Volts.mutable(0);
+  private final MutDistance m_rightDistance = Meters.mutable(0);
+  private final MutLinearVelocity m_rightVelocity = MetersPerSecond.mutable(0);
   private final SysIdRoutine m_sysIdRoutine =
     new SysIdRoutine(
         // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
@@ -259,20 +265,20 @@ public class Chassis extends SubsystemBase {
               // the entire group to be one motor.
               log.motor("drive-left")
                   .voltage(
-                      m_appliedVoltage.mut_replace(
+                      m_leftVoltage.mut_replace(
                           left1.get() * RobotController.getBatteryVoltage(), Volts))
-                  .linearPosition(m_distance.mut_replace(l_encoder.getDistance(), Meters))
+                  .linearPosition(m_leftDistance.mut_replace(l_encoder.getDistance(), Meters))
                   .linearVelocity(
-                      m_velocity.mut_replace(l_encoder.getRate(), MetersPerSecond));
+                      m_leftVelocity.mut_replace(l_encoder.getRate(), MetersPerSecond));
               // Record a frame for the right motors.  Since these share an encoder, we consider
               // the entire group to be one motor.
               log.motor("drive-right")
                   .voltage(
-                      m_appliedVoltage.mut_replace(
+                      m_rightVoltage.mut_replace(
                           right1.get() * RobotController.getBatteryVoltage(), Volts))
-                  .linearPosition(m_distance.mut_replace(r_encoder.getDistance(), Meters))
+                  .linearPosition(m_rightDistance.mut_replace(r_encoder.getDistance(), Meters))
                   .linearVelocity(
-                      m_velocity.mut_replace(r_encoder.getRate(), MetersPerSecond));
+                      m_rightVelocity.mut_replace(r_encoder.getRate(), MetersPerSecond));
             },
             // Tell SysId to make generated commands require this subsystem, suffix test state in
             // WPILog with this subsystem's name ("drive")
