@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class Constants {
@@ -70,6 +71,7 @@ public class Constants {
     public static final double kV = 0.45/NEO_SAFE_RPM;
     public static final int STALL_LIMIT = 60;
     public static final int FREE_LIMIT = 40;
+    public static final Time AUTO_SHOOT_DURATION = null;
   }
   public class Climber {
     public static final int ID_CLIMBER_UP = 12;

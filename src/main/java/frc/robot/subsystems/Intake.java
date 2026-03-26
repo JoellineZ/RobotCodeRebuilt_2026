@@ -19,6 +19,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 public class Intake extends SubsystemBase {
   private final SparkMax m_arm = new SparkMax(Constants.Intake.ID_EXTDENDER, MotorType.kBrushless);
   private final SparkMax m_leftWheel = new SparkMax(Constants.Intake.ID_INTAKE_LFWHEEL, MotorType.kBrushed);
@@ -155,5 +156,12 @@ public class Intake extends SubsystemBase {
     return Commands.run(()->this.setArmPosition(Constants.Intake.RETRACTED_POSITION),this)
     .beforeStarting(this::resetProfileToCurrentPosition)
     .until(()->getError(Constants.Intake.RETRACTED_POSITION)<Constants.Intake.MAX_ERROR);
+  }
+  // ================AUTOS====================
+  public SequentialCommandGroup readyIntake(){
+    return new SequentialCommandGroup(
+      extendCommand(),
+      rollWheelCommand()
+    );
   }
 }

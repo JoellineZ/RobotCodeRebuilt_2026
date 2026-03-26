@@ -54,13 +54,20 @@ public class RobotContainer {
         : stream
     );
     SmartDashboard.putData("Auto Chooser", autoChooser);
+    registerCommands();
     SmartDashboard.putBoolean("Is Competition Mode", isCompetition);
-    NamedCommands.registerCommand("shootFar", m_shooter.shooterPIDCommandFar());
+    configureBindings();
+    defaultCommands();
+  }
+
+  private void registerCommands() {
+    NamedCommands.registerCommand("shootFar", m_shooter.shootCommandFar());
+    NamedCommands.registerCommand("shootMid", m_shooter.shootCommandMid());
+    NamedCommands.registerCommand("shootClose", m_shooter.shootCommandClose());
     NamedCommands.registerCommand("stopShooter", m_shooter.stopShooterCommand());
     NamedCommands.registerCommand("conveyorMove", m_shooter.conveyorCommand());
     NamedCommands.registerCommand("stopConveyor", m_shooter.stopConveyorCommand());
-    configureBindings();
-    defaultCommands();
+    NamedCommands.registerCommand("readyIntake", m_intake.readyIntake());
   }
 
   private void configureBindings() {
