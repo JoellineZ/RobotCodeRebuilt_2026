@@ -24,12 +24,12 @@ public class Constants {
     public static final double kTrackWidth = 0.6; //meters
     public static final double WHEEL_DIAMETER_INCHES = 6.0; //inches
     public static final double ENCODER_TICK_RATIO = (Math.PI * Units.inchesToMeters(WHEEL_DIAMETER_INCHES))/128;
-    public static final double kS = 0.1;
-    public static final double kV = 0.2;
-    public static final double kA = 0.3;
-    public static final double kP = 1.0;
-    public static final double kI = 0.1;
-    public static final double kD = 0.1;
+    public static final double kS = 0.0;
+    public static final double kV = 0.0;
+    public static final double kA = 0.0;
+    public static final double kP = 0.0;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
   }
 
   public class Intake{

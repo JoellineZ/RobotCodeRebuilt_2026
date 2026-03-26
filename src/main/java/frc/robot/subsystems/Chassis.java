@@ -138,13 +138,21 @@ public class Chassis extends SubsystemBase {
     updateSmartDashboard();
   }
 
+  @SuppressWarnings("unused")
   public void drive(ChassisSpeeds chassisSpeeds){
     var wheelSpeeds = m_kinematics.toWheelSpeeds(chassisSpeeds);
     wheelSpeeds.desaturate(Constants.Chassis.MAX_SPEED_ms);
-    double leftPercent = wheelSpeeds.leftMetersPerSecond/Constants.Chassis.MAX_SPEED_ms;
-    double rightPercent = wheelSpeeds.rightMetersPerSecond/Constants.Chassis.MAX_SPEED_ms;
-    left1.set(leftPercent);
-    right1.set(rightPercent);
+    
+    double leftFeedforward = m_feedforward.calculate(wheelSpeeds.leftMetersPerSecond);
+    double rightFeedforward = m_feedforward.calculate(wheelSpeeds.rightMetersPerSecond);
+
+    double leftPID = leftPIDController.calculate(l_encoder.getRate(), wheelSpeeds.leftMetersPerSecond);
+    double rightPID = rightPIDController.calculate(r_encoder.getRate(), wheelSpeeds.rightMetersPerSecond);
+
+    // left1.set(leftFeedforward + leftPID);
+    // right1.set(rightFeedforward + rightPID);
+    right1.set(wheelSpeeds.rightMetersPerSecond/Constants.Chassis.MAX_SPEED_ms);
+    left1.set(wheelSpeeds.leftMetersPerSecond/Constants.Chassis.MAX_SPEED_ms);
   }
 
   public void arcadeDrive(double speed, double rot){
