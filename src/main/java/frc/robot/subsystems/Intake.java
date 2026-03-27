@@ -155,7 +155,8 @@ public class Intake extends SubsystemBase {
   public Command retractCommand(){
     return Commands.run(()->this.setArmPosition(Constants.Intake.RETRACTED_POSITION),this)
     .beforeStarting(this::resetProfileToCurrentPosition)
-    .until(()->getError(Constants.Intake.RETRACTED_POSITION)<Constants.Intake.MAX_ERROR);
+    .until(()->getError(Constants.Intake.RETRACTED_POSITION)<Constants.Intake.MAX_ERROR)
+    .finallyDo(this::resetEncoders);
   }
   // ================AUTOS====================
   public SequentialCommandGroup readyIntake(){

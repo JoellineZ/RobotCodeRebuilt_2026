@@ -14,11 +14,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.*;
 public class RobotContainer {
-  
+  // subsystems
   public Chassis m_chassis = new Chassis();
   public Shooter m_shooter = new Shooter();
   public Intake m_intake = new Intake();
   public climber m_climber = new climber();
+  
   public XboxController drive_controller = new XboxController(Constants.IO.ID_DRIVER_CHASSIS);
   public XboxController mech_controller = new XboxController(Constants.IO.ID_DRIVER_MECH);  
   public XboxController test_controller = new XboxController(Constants.IO.ID_TEST_CONTROLLER);
@@ -61,9 +62,9 @@ public class RobotContainer {
   }
 
   private void registerCommands() {
-    NamedCommands.registerCommand("shootFar", m_shooter.shootCommandFar());
-    NamedCommands.registerCommand("shootMid", m_shooter.shootCommandMid());
-    NamedCommands.registerCommand("shootClose", m_shooter.shootCommandClose());
+    NamedCommands.registerCommand("shootFar", m_shooter.shooterCommandFar());
+    NamedCommands.registerCommand("shootMid", m_shooter.shooterCommandMid());
+    NamedCommands.registerCommand("shootClose", m_shooter.shooterCommandClose());
     NamedCommands.registerCommand("stopShooter", m_shooter.stopShooterCommand());
     NamedCommands.registerCommand("conveyorMove", m_shooter.conveyorCommand());
     NamedCommands.registerCommand("stopConveyor", m_shooter.stopConveyorCommand());
@@ -82,13 +83,13 @@ public class RobotContainer {
 
     /*Shooter */
 
-    shootPIDTriggerClose.onTrue(m_shooter.shooterPIDCommandClose());
+    shootPIDTriggerClose.onTrue(m_shooter.shooterCommandClose());
     shootPIDTriggerClose.onFalse(m_shooter.stopShooterCommand());
 
-    shootPIDTriggerMid.onTrue(m_shooter.shooterPIDCommandMid());
+    shootPIDTriggerMid.onTrue(m_shooter.shooterCommandMid());
     shootPIDTriggerMid.onFalse(m_shooter.stopShooterCommand());
 
-    shootPIDTriggerFar.onTrue(m_shooter.shooterPIDCommandFar());
+    shootPIDTriggerFar.onTrue(m_shooter.shooterCommandFar());
     shootPIDTriggerFar.onFalse(m_shooter.stopShooterCommand());
 
 

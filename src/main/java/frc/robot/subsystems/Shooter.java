@@ -18,7 +18,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
 
@@ -104,7 +103,17 @@ public class Shooter extends SubsystemBase {
     speed = MathUtil.clamp(speed, 0, Constants.Shooter.MAX_RPM);
     masterController.setSetpoint(speed, ControlType.kVelocity);
   }
-
+  public void autoShoot(double speed){ //Debugging*
+    setShooter(speed);
+    autoConveyor();
+  }
+  public void autoConveyor() {
+    ready = Math.abs(masterController.getSetpoint()-masterEncoder.getVelocity())<8?1 : 0;
+    m_conveyor.set(Constants.Shooter.SHOOTER_CONVEYOR_SPEED*ready);
+  }
+  public void setConveyor() {
+    m_conveyor.set(Constants.Shooter.SHOOTER_CONVEYOR_SPEED);
+  }  
   public void updateSmartDashboard(){
     SmartDashboard.putNumber("Conveyor Output", m_conveyor.getAppliedOutput());
     SmartDashboard.putNumber("Back Output", m_slave.getAppliedOutput());
@@ -113,14 +122,9 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Shooter Slave Temp", slaveTemp);
     SmartDashboard.putBoolean("Shooter Overheating", masterTemp > Constants.Shooter.OVERHEAT_TEMP || slaveTemp > Constants.Shooter.OVERHEAT_TEMP);
     SmartDashboard.putNumber("Speed", masterEncoder.getVelocity());
-    SmartDashboard.putNumber("ClosedLoopError", Math.abs(masterEncoder.getVelocity()-masterController.getSetpoint()));
+    SmartDashboard.putNumber("Shooter Error", Math.abs(masterEncoder.getVelocity()-masterController.getSetpoint()));
   }
-
-  public void setConveyor() {
-    ready = Math.abs(masterController.getSetpoint()-masterEncoder.getVelocity())<8?1 : 0;
-    m_conveyor.set(Constants.Shooter.SHOOTER_CONVEYOR_SPEED*ready);
-  }
-  
+    
   // ================COMMANDS&AUTOS===============
   public Command stopShooterCommand(){
     return Commands.runOnce(this::stopShooter, this);
@@ -131,37 +135,6 @@ public class Shooter extends SubsystemBase {
   public Command conveyorCommand(){
     return Commands.run(this::setConveyor, this);
   }
-  public ParallelCommandGroup shootCommandFar(){
-    return new ParallelCommandGroup(
-      shooterPIDCommandFar(),
-      conveyorCommand()
-    );
-  }
-  public ParallelCommandGroup shootCommandMid(){
-    return new ParallelCommandGroup(
-      shooterPIDCommandMid(),
-      conveyorCommand()
-    );
-  }
-  public ParallelCommandGroup shootCommandClose(){
-    return new ParallelCommandGroup(
-      shooterPIDCommandClose(),
-      conveyorCommand()
-    );
-  }
-  public ParallelCommandGroup shootCommand(double speedRpm){
-    return new ParallelCommandGroup(
-      driveShooterCommand(speedRpm),
-      conveyorCommand()
-    );
-  }
-  public SequentialCommandGroup shootCloseSequence(){
-    return new SequentialCommandGroup(
-      shootCommandClose(),
-      new WaitCommand(Constants.Shooter.AUTO_SHOOT_DURATION),
-      stopMotorsCommand()
-    );
-  }
 
   // ===================TEST&DEPS==================
   public Command driveShooterCommand(double speed){
@@ -169,7 +142,7 @@ public class Shooter extends SubsystemBase {
   }
   public SequentialCommandGroup shooterTestCommand(){
     return new SequentialCommandGroup(
-      driveShooterCommand(500),
+      driveShooterCommand(1000),
       new WaitCommand(10),
       stopShooterCommand()
     );
@@ -177,13 +150,13 @@ public class Shooter extends SubsystemBase {
   public Command stopMotorsCommand(){
     return Commands.runOnce(this::stopMotors, this);
   }
-  public Command shooterPIDCommandClose(){
+  public Command shooterCommandClose(){
     return Commands.run(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM*0.65),this);
   }
-  public Command shooterPIDCommandMid(){
+  public Command shooterCommandMid(){
     return Commands.run(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM*0.75),this);
   }
-  public Command shooterPIDCommandFar(){
+  public Command shooterCommandFar(){
     return Commands.runOnce(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM),this);
   }  
 }
