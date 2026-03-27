@@ -211,6 +211,12 @@ public class Chassis extends SubsystemBase {
       pose
     );
   }
+  public void setTestPose(){
+    Pose2d testPose = new Pose2d(l_encoder.getDistance(), 1, new Rotation2d(Math.toRadians(90)));
+    resetPose(testPose);
+    
+  }
+
   public void resetOdometry(Pose2d pose) {
     l_encoder.reset();
     r_encoder.reset();
@@ -245,6 +251,9 @@ public class Chassis extends SubsystemBase {
           (Math.abs(controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT)) > Constants.Chassis.kDeadBandRot ? controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT) : 0))
           ,this
         );
+  }
+  public Command setTestPoseCommand(){
+    return this.runOnce(() -> setTestPose());
   }
 
   // SYS ID -- [DELETE LATER] CODE FROM FRC DOCUMENTATION

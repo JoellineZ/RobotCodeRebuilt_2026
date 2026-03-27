@@ -68,6 +68,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("conveyorMove", m_shooter.conveyorCommand());
     NamedCommands.registerCommand("stopConveyor", m_shooter.stopConveyorCommand());
     NamedCommands.registerCommand("readyIntake", m_intake.readyIntake());
+    NamedCommands.registerCommand("setTestPose", m_chassis.setTestPoseCommand());
   }
 
   private void configureBindings() {

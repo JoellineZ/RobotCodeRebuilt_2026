@@ -40,7 +40,7 @@ public class Constants {
     public static final int ID_INTAKE_RFWHEEL = 9;
     public static final int ID_INTAKE_LFWHEEL = 10;
     public static final double MAX_ARM_SPEED_PERCENT = 0.3;
-    public static final double INTAKE_ROLL_SPEED = 0.9;
+    public static final double INTAKE_ROLL_SPEED = 0.7;
     public static final double kP = 0.1; // 
     public static final double kI = 0.001;
     public static final double kD = 0.01;
