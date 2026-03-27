@@ -76,19 +76,18 @@ public class Chassis extends SubsystemBase {
     right1.setNeutralMode(NeutralMode.Brake);
     left2.setNeutralMode(NeutralMode.Brake);
     right2.setNeutralMode(NeutralMode.Brake);
-    left1.setInverted(true);
-    left2.setInverted(true);
+    right1.setInverted(true);
+    right2.setInverted(true);
 
     l_encoder = new Encoder(Constants.Chassis.ID_ENCODER_LEFT1, Constants.Chassis.ID_ENCODER_LEFT2);
     r_encoder = new Encoder(Constants.Chassis.ID_ENCODER_RIGHT1, Constants.Chassis.ID_ENCODER_RIGHT2);
     l_encoder.setDistancePerPulse(Constants.Chassis.ENCODER_TICK_RATIO);
     r_encoder.setDistancePerPulse(Constants.Chassis.ENCODER_TICK_RATIO);
-    r_encoder.setReverseDirection(true);
     
     l_encoder.reset();
     r_encoder.reset();
-    l_encoder.setReverseDirection(true); // Inversion fisica de los encoders
-    r_encoder.setReverseDirection(false);
+    l_encoder.setReverseDirection(false); // Inversion fisica de los encoders
+    r_encoder.setReverseDirection(true);
     gyro.zeroYaw();
     gyro.reset();
 
@@ -162,14 +161,10 @@ public class Chassis extends SubsystemBase {
   }
 
   private void arcadeDrive(double speed, double rot){
-    if(speed<Constants.Chassis.kDeadBandRotSpeed&&Math.abs(rot)>=Constants.Chassis.kDeadBandRot){
-      ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
-        0,
-        0,
-        rot
-      );
-      drive(chassisSpeeds);
-    }else{
+    // if(speed<Constants.Chassis.kDeadBandRotSpeed&&Math.abs(rot)>=Constants.Chassis.kDeadBandRot){
+    //   left1.set(rot*Constants.Chassis.K_AXIS_ROTATION);
+    //   left2.set(-rot*Constants.Chassis.K_AXIS_ROTATION);
+    // }else{
       rot = Math.abs(rot)>=Constants.Chassis.kDeadBandRot ? rot : 0;
       speed = Math.abs(speed) >=Constants.Chassis.kDeadBandSpeed ? speed :0;
       double forwardSpeed = speed*Constants.Chassis.MAX_SPEED_ms;
@@ -180,7 +175,7 @@ public class Chassis extends SubsystemBase {
       rotationSpeed
       );
       drive(chassisSpeeds);
-    }    
+    // }    
   }
 
   private void StopChassis(){
@@ -270,7 +265,7 @@ public class Chassis extends SubsystemBase {
       () -> 
         this.arcadeDrive(
           (controller.getRawAxis(Constants.IO.ID_JOYSTICK_SPEED)- controller.getRawAxis(Constants.IO.ID_JOYSTICK_BRAKE)),
-          (Math.abs(controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT)) > Constants.Chassis.kDeadBandRot ? controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT) : 0))
+          (Math.abs(controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT)) > Constants.Chassis.kDeadBandRot ? -controller.getRawAxis(Constants.IO.ID_JOYSTICK_ROT) : 0))
           ,this
         );
   }

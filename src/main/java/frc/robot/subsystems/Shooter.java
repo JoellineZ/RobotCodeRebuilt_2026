@@ -103,6 +103,10 @@ public class Shooter extends SubsystemBase {
     speed = MathUtil.clamp(speed, 0, Constants.Shooter.MAX_RPM);
     masterController.setSetpoint(speed, ControlType.kVelocity);
   }
+  public void setShooterConveyor(double speed){
+    setShooter(speed);
+    setConveyor();
+  }
   public void autoShoot(double speed){ //Debugging*
     setShooter(speed);
     autoConveyor();
@@ -151,12 +155,19 @@ public class Shooter extends SubsystemBase {
     return Commands.runOnce(this::stopMotors, this);
   }
   public Command shooterCommandClose(){
-    return Commands.run(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM*0.65),this);
+    return Commands.runOnce(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM*0.65),this);
   }
   public Command shooterCommandMid(){
-    return Commands.run(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM*0.75),this);
+    return Commands.runOnce(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM*0.75),this);
   }
   public Command shooterCommandFar(){
     return Commands.runOnce(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM),this);
-  }  
+  }
+  public Command shootAndConveyorCommand(double percent){
+    return new SequentialCommandGroup(
+      shooterCommandMid(),
+      new WaitCommand(3),
+      Commands.run(()->this.setShooterConveyor(Constants.Shooter.NEO_SAFE_RPM*percent))
+    );
+  }
 }

@@ -11,10 +11,10 @@ public class Constants {
     public static final int ID_CH_LF2 = 2;
     public static final int ID_CH_RG1 = 3;
     public static final int ID_CH_RG2 = 4;
-    public static final int ID_ENCODER_RIGHT1 = 6; // Encoders not yet connected to RIO, ID 0S are placeholders
-    public static final int ID_ENCODER_RIGHT2 = 7;
-    public static final int ID_ENCODER_LEFT1 = 8;
-    public static final int ID_ENCODER_LEFT2 = 9;
+    public static final int ID_ENCODER_RIGHT1 = 8; // Encoders not yet connected to RIO, ID 0S are placeholders
+    public static final int ID_ENCODER_RIGHT2 = 9;
+    public static final int ID_ENCODER_LEFT1 = 6;
+    public static final int ID_ENCODER_LEFT2 = 7;
     public static final double kRot = 1;
     public static final double kLoopRamp = 0.05;
     public static final double kDeadBandSpeed = 0.05;
@@ -35,6 +35,7 @@ public class Constants {
     public static final double kP_a = 1/360; //PID angulo - MaxPower/MaxError
     public static final double kI_a = 0;
     public static final double kD_a = 0;
+    public static final double K_AXIS_ROTATION = 0.75;
   }
 
   public class Intake{
@@ -43,7 +44,7 @@ public class Constants {
     public static final double LIMIT_FWD = 20;
     public static final int ID_INTAKE_RFWHEEL = 9;
     public static final int ID_INTAKE_LFWHEEL = 10;
-    public static final double MAX_ARM_SPEED_PERCENT = 0.3;
+    public static final double MAX_ARM_SPEED_PERCENT = 0.225;
     public static final double INTAKE_ROLL_SPEED = 0.8;
     public static final double kP = 0.2; // 
     public static final double kI = 0.0;
@@ -66,7 +67,7 @@ public class Constants {
     public static final double SHOOTER_CONVEYOR_SPEED = 0.65;
     public static final double OVERHEAT_TEMP = 60.0;
     public static final double K_BACKSPIN = 0.6;
-    public static final double NEO_SAFE_RPM = 2500.0;//5000
+    public static final double NEO_SAFE_RPM = 5000.0;//5000
     public static final double MAX_RPM = NEO_SAFE_RPM;
     public static final double MAX_RPM_FRONT = NEO_SAFE_RPM;
     public static final double kP = 0.00025;
@@ -92,9 +93,9 @@ public class Constants {
     public static final int ID_DRIVER_CHASSIS = 1;
     public static final int ID_DRIVER_MECH = 0;    
     public static final int ID_TEST_CONTROLLER = 2;
-    public static final int ID_JOYSTICK_SPEED = XboxController.Axis.kLeftTrigger.value;
+    public static final int ID_JOYSTICK_SPEED = XboxController.Axis.kRightTrigger.value;
     public static final int ID_JOYSTICK_ROT = 0;
-    public static final int ID_JOYSTICK_BRAKE = XboxController.Axis.kRightTrigger.value;
+    public static final int ID_JOYSTICK_BRAKE = XboxController.Axis.kLeftTrigger.value;
   }
 
   public class Robot {
