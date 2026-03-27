@@ -135,6 +135,7 @@ public class Chassis extends SubsystemBase {
   @Override
   public void periodic() {
     updateOdometry();
+    field.setRobotPose(m_odometry.getPoseMeters());
     updateSmartDashboard();
   }
 
@@ -183,8 +184,8 @@ public class Chassis extends SubsystemBase {
       SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
       SmartDashboard.putNumber("Gyro Pitch", gyro.getPitch());
       SmartDashboard.putNumber("Gyro Roll", gyro.getRoll());
-      SmartDashboard.putNumber("Left Encoder Ticks", l_encoder.get());
-      SmartDashboard.putNumber("Right Encoder Ticks", r_encoder.get());
+      SmartDashboard.putNumber("Left Encoder Pos", l_encoder.getDistance());
+      SmartDashboard.putNumber("Right Encoder Pos", r_encoder.getDistance());
       SmartDashboard.putData("Field",field);
     }
   }
