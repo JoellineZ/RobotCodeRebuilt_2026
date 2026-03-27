@@ -8,12 +8,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.units.measure.MutDistance;
-import edu.wpi.first.units.measure.MutLinearVelocity;
-import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -23,12 +19,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPLTVController;
@@ -78,6 +73,7 @@ public class Chassis extends SubsystemBase {
     right2.setNeutralMode(NeutralMode.Brake);
     left1.setInverted(true);
     left2.setInverted(true);
+    SignalLogger.setPath("/media/sda1");
 
     l_encoder = new Encoder(Constants.Chassis.ID_ENCODER_LEFT1, Constants.Chassis.ID_ENCODER_LEFT2);
     r_encoder = new Encoder(Constants.Chassis.ID_ENCODER_RIGHT1, Constants.Chassis.ID_ENCODER_RIGHT2);
@@ -280,17 +276,22 @@ public class Chassis extends SubsystemBase {
 
   // SYS ID -- [DELETE LATER] CODE FROM FRC DOCUMENTATION
   // Left
-  private final MutVoltage m_leftVoltage = Volts.mutable(0);
-  private final MutDistance m_leftDistance = Meters.mutable(0);
-  private final MutLinearVelocity m_leftVelocity = MetersPerSecond.mutable(0);
-  // Right
-  private final MutVoltage m_rightVoltage = Volts.mutable(0);
-  private final MutDistance m_rightDistance = Meters.mutable(0);
-  private final MutLinearVelocity m_rightVelocity = MetersPerSecond.mutable(0);
+  // private final MutVoltage m_leftVoltage = Volts.mutable(0);
+  // private final MutDistance m_leftDistance = Meters.mutable(0);
+  // private final MutLinearVelocity m_leftVelocity = MetersPerSecond.mutable(0);
+  // // Right
+  // private final MutVoltage m_rightVoltage = Volts.mutable(0);
+  // private final MutDistance m_rightDistance = Meters.mutable(0);
+  // private final MutLinearVelocity m_rightVelocity = MetersPerSecond.mutable(0);
   private final SysIdRoutine m_sysIdRoutine =
     new SysIdRoutine(
         // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
-        new SysIdRoutine.Config(),
+        new SysIdRoutine.Config(
+          null,
+          Volts.of(7),//Arbitrary prevent brownout
+          null,
+          (state)-> SignalLogger.writeString("state",state.toString())
+        ),
         new SysIdRoutine.Mechanism(
             // Tell SysId how to plumb the driving voltage to the motors.
             voltage -> {
@@ -299,26 +300,25 @@ public class Chassis extends SubsystemBase {
             },
             // Tell SysId how to record a frame of data for each motor on the mechanism being
             // characterized.
-            log -> {
-              // Record a frame for the left motors.  Since these share an encoder, we consider
-              // the entire group to be one motor.
-              log.motor("drive-left")
-                  .voltage(
-                      m_leftVoltage.mut_replace(
-                          left1.get() * RobotController.getBatteryVoltage(), Volts))
-                  .linearPosition(m_leftDistance.mut_replace(l_encoder.getDistance(), Meters))
-                  .linearVelocity(
-                      m_leftVelocity.mut_replace(l_encoder.getRate(), MetersPerSecond));
-              // Record a frame for the right motors.  Since these share an encoder, we consider
-              // the entire group to be one motor.
-              log.motor("drive-right")
-                  .voltage(
-                      m_rightVoltage.mut_replace(
-                          right1.get() * RobotController.getBatteryVoltage(), Volts))
-                  .linearPosition(m_rightDistance.mut_replace(r_encoder.getDistance(), Meters))
-                  .linearVelocity(
-                      m_rightVelocity.mut_replace(r_encoder.getRate(), MetersPerSecond));
-            },
+            // log -> {
+            //   // Record a frame for the left motors.  Since these share an encoder, we consider
+            //   // the entire group to be one motor.
+            //   log.motor("drive-left")
+            //       .voltage(
+            //           m_leftVoltage.mut_replace(
+            //               left1.get() * RobotController.getBatteryVoltage(), Volts))
+            //       .linearPosition(m_leftDistance.mut_replace(l_encoder.getDistance(), Meters))
+            //       .linearVelocity(m_leftVelocity.mut_replace(l_encoder.getRate(), MetersPerSecond));
+            //   // Record a frame for the right motors.  Since these share an encoder, we consider
+            //   // the entire group to be one motor.
+            //   log.motor("drive-right")
+            //       .voltage(
+            //           m_rightVoltage.mut_replace(
+            //               right1.get() * RobotController.getBatteryVoltage(), Volts))
+            //       .linearPosition(m_rightDistance.mut_replace(r_encoder.getDistance(), Meters))
+            //       .linearVelocity(m_rightVelocity.mut_replace(r_encoder.getRate(), MetersPerSecond));
+            // },
+            null, //logs disabled for SignalLogger
             // Tell SysId to make generated commands require this subsystem, suffix test state in
             // WPILog with this subsystem's name ("drive")
             this));
