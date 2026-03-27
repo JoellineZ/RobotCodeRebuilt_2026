@@ -16,9 +16,10 @@ public class Constants {
     public static final int ID_ENCODER_LEFT1 = 8;
     public static final int ID_ENCODER_LEFT2 = 9;
     public static final double kRot = 1;
-    public static final double kLoopRamp = 0.1;
+    public static final double kLoopRamp = 0.05;
     public static final double kDeadBandSpeed = 0.05;
     public static final double kDeadBandRot = 0.1;
+    public static final double kDeadBandRotSpeed = 0.1;
     public static final double kPIDThreshold = 0.5;
     public static final double MAX_SPEED_ms = 3.0;
     public static final double MAX_ROTATION_SPEED_RAD_S = 3.0;
@@ -31,6 +32,9 @@ public class Constants {
     public static final double kP = 0.0;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
+    public static final double kP_a = 1/360; //PID angulo - MaxPower/MaxError
+    public static final double kI_a = 0;
+    public static final double kD_a = 0;
   }
 
   public class Intake{

@@ -3,45 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.3371664512520196,
-        "y": 5.57649356171259
+        "x": 2.318216833095578,
+        "y": 5.969329529243937
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.904179743223965,
-        "y": 6.163409415121254
+        "x": 3.318216833095578,
+        "y": 5.969329529243937
       },
       "isLocked": false,
-      "linkedName": "LeaveStartMid"
+      "linkedName": "FinShootCentro"
     },
     {
       "anchor": {
-        "x": 3.7285306704707555,
-        "y": 7.379643366619116
+        "x": 4.077874465049928,
+        "y": 7.405520684736091
       },
       "prevControl": {
-        "x": 2.7300894578742656,
-        "y": 7.4354568505530825
+        "x": 3.077874465049928,
+        "y": 7.405520684736091
       },
       "nextControl": {
-        "x": 5.811654778887304,
-        "y": 7.263195435092724
+        "x": 5.077874465049928,
+        "y": 7.405520684736091
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.571312410841653,
-        "y": 7.0691155492154065
+        "x": 7.804208273894435,
+        "y": 6.887974322396576
       },
       "prevControl": {
-        "x": 7.519557774607701,
-        "y": 8.000699001426533
+        "x": 7.855962910128387,
+        "y": 7.948944365192581
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "StartInakeUp"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -61,9 +61,9 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Debug",
   "idealStartingState": {
-    "velocity": 3.0,
+    "velocity": 0,
     "rotation": 0.0
   },
   "useDefaultConstraints": true

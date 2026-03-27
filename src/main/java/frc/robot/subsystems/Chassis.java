@@ -1,4 +1,5 @@
 package frc.robot.subsystems;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -39,6 +40,10 @@ public class Chassis extends SubsystemBase {
   private final WPI_TalonSRX left2 = new WPI_TalonSRX(Constants.Chassis.ID_CH_LF2);
   private final WPI_TalonSRX right1 = new WPI_TalonSRX(Constants.Chassis.ID_CH_RG1);
   private final WPI_TalonSRX right2 = new WPI_TalonSRX(Constants.Chassis.ID_CH_RG2);
+  private final PIDController anglePIDController = new PIDController(
+    Constants.Chassis.kP_a, 
+    Constants.Chassis.kI_a, 
+    Constants.Chassis.kD_a);
   private final PIDController rightPIDController = new PIDController(
     Constants.Chassis.kP,
     Constants.Chassis.kI, 
@@ -62,7 +67,7 @@ public class Chassis extends SubsystemBase {
   // Pathplanner
   private boolean odometry_engaged=true;
   private DifferentialDriveOdometry m_odometry;
-  public Field2d field = new Field2d();
+  private Field2d field = new Field2d();
 
   public Chassis() {
     left2.follow(left1);
@@ -127,7 +132,7 @@ public class Chassis extends SubsystemBase {
         this);
     }
   }
-  public void updateOdometry(){
+  private void updateOdometry(){
     m_odometry.update(Rotation2d.fromDegrees(gyro.getYaw()), l_encoder.getDistance(),r_encoder.getDistance());
   }
 
@@ -140,7 +145,7 @@ public class Chassis extends SubsystemBase {
   }
 
   @SuppressWarnings("unused")
-  public void drive(ChassisSpeeds chassisSpeeds){
+  private void drive(ChassisSpeeds chassisSpeeds){
     var wheelSpeeds = m_kinematics.toWheelSpeeds(chassisSpeeds);
     wheelSpeeds.desaturate(Constants.Chassis.MAX_SPEED_ms);
     
@@ -156,25 +161,41 @@ public class Chassis extends SubsystemBase {
     left1.set(wheelSpeeds.leftMetersPerSecond/Constants.Chassis.MAX_SPEED_ms);
   }
 
-  public void arcadeDrive(double speed, double rot){
-    // deadbands
-    rot = Math.abs(rot)>=Constants.Chassis.kDeadBandRot ? rot : 0;
-    speed = Math.abs(speed) >=Constants.Chassis.kDeadBandSpeed ? speed :0;
-    double forwardSpeed = speed*Constants.Chassis.MAX_SPEED_ms;
-    double rotationSpeed = rot*Constants.Chassis.MAX_ROTATION_SPEED_RAD_S;
-    ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
-    forwardSpeed, 
-    0, // No lateral movement in Tank Chassis
-    rotationSpeed
-    );
-    drive(chassisSpeeds);    
+  private void arcadeDrive(double speed, double rot){
+    if(speed<Constants.Chassis.kDeadBandRotSpeed&&Math.abs(rot)>=Constants.Chassis.kDeadBandRot){
+      ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
+        0,
+        0,
+        rot
+      );
+      drive(chassisSpeeds);
+    }else{
+      rot = Math.abs(rot)>=Constants.Chassis.kDeadBandRot ? rot : 0;
+      speed = Math.abs(speed) >=Constants.Chassis.kDeadBandSpeed ? speed :0;
+      double forwardSpeed = speed*Constants.Chassis.MAX_SPEED_ms;
+      double rotationSpeed = rot*Constants.Chassis.MAX_ROTATION_SPEED_RAD_S;
+      ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
+      forwardSpeed, 
+      0, // No lateral movement in Tank Chassis
+      rotationSpeed
+      );
+      drive(chassisSpeeds);
+    }    
   }
 
-  public boolean StopChassis(){
+  private void StopChassis(){
     left1.stopMotor();
     right1.stopMotor();
-    // Followers stop automatically
-    return true;
+  }
+
+  @SuppressWarnings("unused")
+  private void goToAngle(double target){
+    anglePIDController.enableContinuousInput(-180, 180);
+    double rotationOutput = anglePIDController.calculate(gyro.getYaw(), target);
+    rotationOutput = MathUtil.clamp(rotationOutput, 
+        -Constants.Chassis.MAX_ROTATION_SPEED_RAD_S, 
+         Constants.Chassis.MAX_ROTATION_SPEED_RAD_S);
+    drive(new ChassisSpeeds(0, 0, rotationOutput));
   }
 
   private void updateSmartDashboard(){

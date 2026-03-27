@@ -22,8 +22,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 public class Intake extends SubsystemBase {
   private final SparkMax m_arm = new SparkMax(Constants.Intake.ID_EXTDENDER, MotorType.kBrushless);
-  private final SparkMax m_leftWheel = new SparkMax(Constants.Intake.ID_INTAKE_LFWHEEL, MotorType.kBrushed);
-  private final SparkMax m_rightWheel = new SparkMax(Constants.Intake.ID_INTAKE_RFWHEEL, MotorType.kBrushed);   
+  private final SparkMax m_leftWheel = new SparkMax(Constants.Intake.ID_INTAKE_LFWHEEL, MotorType.kBrushless);
+  private final SparkMax m_rightWheel = new SparkMax(Constants.Intake.ID_INTAKE_RFWHEEL, MotorType.kBrushless);   
   private SparkMaxConfig armConfig = new SparkMaxConfig();
   private SparkMaxConfig lwheelConfig = new SparkMaxConfig();
   private SparkMaxConfig rWheelConfig = new SparkMaxConfig();
