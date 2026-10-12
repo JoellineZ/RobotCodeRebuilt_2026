@@ -103,7 +103,21 @@ public class Shooter extends SubsystemBase {
     speed = MathUtil.clamp(speed, 0, Constants.Shooter.MAX_RPM);
     masterController.setSetpoint(speed, ControlType.kVelocity);
   }
-
+  public void setShooterConveyor(double speed){
+    setShooter(speed);
+    setConveyor();
+  }
+  public void autoShoot(double speed){ //Debugging*
+    setShooter(speed);
+    autoConveyor();
+  }
+  public void autoConveyor() {
+    ready = Math.abs(masterController.getSetpoint()-masterEncoder.getVelocity())<8?1 : 0;
+    m_conveyor.set(Constants.Shooter.SHOOTER_CONVEYOR_SPEED*ready);
+  }
+  public void setConveyor() {
+    m_conveyor.set(Constants.Shooter.SHOOTER_CONVEYOR_SPEED);
+  }  
   public void updateSmartDashboard(){
     SmartDashboard.putNumber("Conveyor Output", m_conveyor.getAppliedOutput());
     SmartDashboard.putNumber("Back Output", m_slave.getAppliedOutput());
@@ -112,51 +126,48 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Shooter Slave Temp", slaveTemp);
     SmartDashboard.putBoolean("Shooter Overheating", masterTemp > Constants.Shooter.OVERHEAT_TEMP || slaveTemp > Constants.Shooter.OVERHEAT_TEMP);
     SmartDashboard.putNumber("Speed", masterEncoder.getVelocity());
-    SmartDashboard.putNumber("ClosedLoopError", Math.abs(masterEncoder.getVelocity()-masterController.getSetpoint()));
+    SmartDashboard.putNumber("Shooter Error", Math.abs(masterEncoder.getVelocity()-masterController.getSetpoint()));
   }
-
-  public void setConveyor() {
-    ready = Math.abs(masterController.getSetpoint()-masterEncoder.getVelocity())<5?1 : 0;
-    m_conveyor.set(Constants.Shooter.SHOOTER_CONVEYOR_SPEED*ready);
-  }
-  
-  // ====================COMMANDS====================
+    
+  // ================COMMANDS&AUTOS===============
   public Command stopShooterCommand(){
     return Commands.runOnce(this::stopShooter, this);
   }
   public Command stopConveyorCommand(){
     return Commands.runOnce(this::stopConveyor, this);
   }
+  public Command conveyorCommand(){
+    return Commands.run(this::setConveyor, this);
+  }
+
+  // ===================TEST&DEPS==================
   public Command driveShooterCommand(double speed){
     return Commands.run(()-> this.setShooter(speed),this);
   }
   public SequentialCommandGroup shooterTestCommand(){
     return new SequentialCommandGroup(
-      driveShooterCommand(500),
+      driveShooterCommand(1000),
       new WaitCommand(10),
       stopShooterCommand()
     );
   }
-
-  public Command shooterPIDCommandClose(){
-    return Commands.run(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM*0.65),this);
+  public Command stopMotorsCommand(){
+    return Commands.runOnce(this::stopMotors, this);
   }
-
-  public Command shooterPIDCommandMid(){
-    return Commands.run(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM*0.75),this);
+  public Command shooterCommandClose(){
+    return Commands.runOnce(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM*0.65),this);
   }
-
-  public Command shooterPIDCommandFar(){
+  public Command shooterCommandMid(){
+    return Commands.runOnce(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM*0.75),this);
+  }
+  public Command shooterCommandFar(){
     return Commands.runOnce(()-> this.setShooter(Constants.Shooter.NEO_SAFE_RPM),this);
   }
-
-  public Command conveyorCommand(){
-    return Commands.run(this::setConveyor, this);
-  }
-  public SequentialCommandGroup shootSequence(){
+  public Command shootAndConveyorCommand(double percent){
     return new SequentialCommandGroup(
-      shooterPIDCommandFar(),
-      conveyorCommand()
+      shooterCommandMid(),
+      new WaitCommand(3),
+      Commands.run(()->this.setShooterConveyor(Constants.Shooter.NEO_SAFE_RPM*percent))
     );
   }
 }

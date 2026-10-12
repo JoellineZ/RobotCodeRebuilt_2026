@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class Constants {
@@ -10,26 +11,31 @@ public class Constants {
     public static final int ID_CH_LF2 = 2;
     public static final int ID_CH_RG1 = 3;
     public static final int ID_CH_RG2 = 4;
-    public static final int ID_ENCODER_RIGHT1 = 6; // Encoders not yet connected to RIO, ID 0S are placeholders
-    public static final int ID_ENCODER_RIGHT2 = 7;
-    public static final int ID_ENCODER_LEFT1 = 8;
-    public static final int ID_ENCODER_LEFT2 = 9;
+    public static final int ID_ENCODER_RIGHT1 = 8; // Encoders not yet connected to RIO, ID 0S are placeholders
+    public static final int ID_ENCODER_RIGHT2 = 9;
+    public static final int ID_ENCODER_LEFT1 = 6;
+    public static final int ID_ENCODER_LEFT2 = 7;
     public static final double kRot = 1;
-    public static final double kLoopRamp = 0.1;
+    public static final double kLoopRamp = 0.05;
     public static final double kDeadBandSpeed = 0.05;
     public static final double kDeadBandRot = 0.1;
+    public static final double kDeadBandRotSpeed = 0.1;
     public static final double kPIDThreshold = 0.5;
     public static final double MAX_SPEED_ms = 3.0;
     public static final double MAX_ROTATION_SPEED_RAD_S = 3.0;
     public static final double kTrackWidth = 0.6; //meters
     public static final double WHEEL_DIAMETER_INCHES = 6.0; //inches
     public static final double ENCODER_TICK_RATIO = (Math.PI * Units.inchesToMeters(WHEEL_DIAMETER_INCHES))/128;
-    public static final double kS = 0.1;
-    public static final double kV = 0.2;
-    public static final double kA = 0.3;
-    public static final double kP = 1.0;
-    public static final double kI = 0.1;
-    public static final double kD = 0.1;
+    public static final double kS = 0.0;
+    public static final double kV = 0.0;
+    public static final double kA = 0.0;
+    public static final double kP = 0.0;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
+    public static final double kP_a = 1/360; //PID angulo - MaxPower/MaxError
+    public static final double kI_a = 0;
+    public static final double kD_a = 0;
+    public static final double K_AXIS_ROTATION = 0.75;
   }
 
   public class Intake{
@@ -38,17 +44,20 @@ public class Constants {
     public static final double LIMIT_FWD = 20;
     public static final int ID_INTAKE_RFWHEEL = 9;
     public static final int ID_INTAKE_LFWHEEL = 10;
-    public static final double MAX_ARM_SPEED_PERCENT = 0.3;
-    public static final double INTAKE_ROLL_SPEED = 0.9;
-    public static final double kP = 0.1; // 
-    public static final double kI = 0.001;
-    public static final double kD = 0.01;
+    public static final double MAX_ARM_SPEED_PERCENT = 0.225;
+    public static final double INTAKE_ROLL_SPEED = 0.8;
+    public static final double kP = 0.2; // 
+    public static final double kI = 0.0;
+    public static final double kD = 0.1;
     public static final double MIN_ARM_POSITION = 0;
     public static final double MAX_ARM_POSITION = 12.4;
-    public static final double MAX_ERROR =0.5; //Rotations
-    public static final double EXTENDED_POSITION = 12.4;
+    public static final double MAX_ERROR =0.2; //Rotations
+    public static final double EXTENDED_POSITION = 12.2;
     public static final double RETRACTED_POSITION = 0;
     public static final int ID_CLIMBER_DOWN = 0;
+    public static final double MAX_ARM_TRAPEZOIDPROFILE_VELOCITY = 8.0;
+    public static final double MAX_ARM_TRAPEZOIDPROFILE_ACCELERATION = 10.0;
+    public static final double kDt = 0.02; //seconds
   }
 
   public class Shooter{        
@@ -58,7 +67,7 @@ public class Constants {
     public static final double SHOOTER_CONVEYOR_SPEED = 0.65;
     public static final double OVERHEAT_TEMP = 60.0;
     public static final double K_BACKSPIN = 0.6;
-    public static final double NEO_SAFE_RPM = 2500.0;//5000
+    public static final double NEO_SAFE_RPM = 5000.0;//5000
     public static final double MAX_RPM = NEO_SAFE_RPM;
     public static final double MAX_RPM_FRONT = NEO_SAFE_RPM;
     public static final double kP = 0.00025;
@@ -67,6 +76,7 @@ public class Constants {
     public static final double kV = 0.45/NEO_SAFE_RPM;
     public static final int STALL_LIMIT = 60;
     public static final int FREE_LIMIT = 40;
+    public static final Time AUTO_SHOOT_DURATION = null;
   }
   public class Climber {
     public static final int ID_CLIMBER_UP = 12;
@@ -83,9 +93,9 @@ public class Constants {
     public static final int ID_DRIVER_CHASSIS = 1;
     public static final int ID_DRIVER_MECH = 0;    
     public static final int ID_TEST_CONTROLLER = 2;
-    public static final int ID_JOYSTICK_SPEED = XboxController.Axis.kLeftTrigger.value;
+    public static final int ID_JOYSTICK_SPEED = XboxController.Axis.kRightTrigger.value;
     public static final int ID_JOYSTICK_ROT = 0;
-    public static final int ID_JOYSTICK_BRAKE = XboxController.Axis.kRightTrigger.value;
+    public static final int ID_JOYSTICK_BRAKE = XboxController.Axis.kLeftTrigger.value;
   }
 
   public class Robot {
